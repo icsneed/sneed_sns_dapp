@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>sneed_dapp</title>
+    <base href="/" />
+    <link rel="icon" href="favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <main>
+      <img src="logo2.svg" alt="DFINITY logo" />
+      <br />
+      <br />      
+      1) Send Sneed to: czysu-eaaaa-aaaag-qcvdq-cai<br/>
+      2) Check your balance:
+      <form action="#">
+        <label for="account">Principal: &nbsp;</label>
+        <input id="account" alt="Principal" type="text" />
+        <label for="subaccount">Subaccount (optional): &nbsp;</label>
+        <input id="subaccount" alt="Subaccount" type="text" />
+        <button type="submit">Check Balance</button>
+      </form>
+      <section id="balance"></section>
+      <section id="refundable"></section>
+      <input id="refund" type="button" value="Refund" disabled  /><br/><br/>
+      3) Convert your Sneed to SNS-1:<br/>
+      <input id="convert" type="button" value="Convert" disabled  />
+      <section id="result"></section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "canisters": {
+    "sneed_dapp_backend": {
+      "main": "src/sneed_dapp_backend/main.mo",
+      "type": "motoko"
+    },
+    "sneed_dapp_frontend": {
+      "dependencies": [
+        "sneed_dapp_backend"
+      ],
+      "frontend": {
+        "entrypoint": "src/sneed_dapp_frontend/src/index.html"
+      },
+      "source": [
+        "src/sneed_dapp_frontend/assets",
+        "dist/sneed_dapp_frontend/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
