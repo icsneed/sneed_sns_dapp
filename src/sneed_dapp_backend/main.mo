@@ -62,7 +62,7 @@ import T "Types";
 
 actor {
 
-// VARIABLES
+/// VARIABLES ///
 
   // Token and indexer canister ids of old and new token
   //stable var new_token_id = "zfcdd-tqaaa-aaaaq-aaaga-cai"; // TODO (Currently SNS-1)
@@ -128,7 +128,7 @@ actor {
   //let cooldown_ns : Nat = 3600000000000; // "1 hour ns"       - PESSIMISTIC
 
 
-// ACTORS
+/// ACTORS ///
 
   // Old token canister
   let old_token_canister : T.TokenInterface  = actor (old_token_id);
@@ -631,7 +631,7 @@ actor {
     };
   };
 
-  // Burns OLD tokens stored on the dApp.
+  // Burn OLD tokens stored on the dApp.
   private func BurnOldTokens(amount_d12: T.Balance) : async T.BurnOldTokensResult {
 
     // Ensure burns are allowed.
@@ -952,7 +952,7 @@ actor {
     new_token_id == "aaaaa-aa" or new_indexer_id == "aaaaa-aa" 
   };
 
-// SYSTEM EVENTS  
+/// SYSTEM EVENTS ///  
 
   system func preupgrade() {
     stable_new_latest_sent_txids := Iter.toArray(new_latest_sent_txids.entries());

@@ -17,6 +17,7 @@ type Timestamp = Nat64;
 type Subaccount = Blob;
 type TxIndex = Nat;
 type Balance = Nat;
+type TxIndexes = List.List<TxIndex>;
 
 type Account = {
     owner : Principal;
@@ -35,7 +36,6 @@ type NewTransactionWithId = {
 
 type GetNewTransactions = {
     transactions : [NewTransactionWithId];
-    // The txid of the oldest transaction the account has
     oldest_tx_id : ?TxIndex;
 };
 
@@ -71,6 +71,7 @@ type OldTransaction = {
     index : TxIndex;
     timestamp : Timestamp;
 };
+
 type OldTransfer = {
     from : Account;
     to : Account;
@@ -79,6 +80,7 @@ type OldTransfer = {
     memo : ?Blob;
     created_at_time : ?Nat64;
 };
+
 type NewTransfer = {
     amount : Nat;
     from : Account;
@@ -88,18 +90,21 @@ type NewTransfer = {
     created_at_time : ?Nat64;
     fee : ?Nat;
 };
+
 type Mint = {
     to : Account;
     amount : Balance;
     memo : ?Blob;
     created_at_time : ?Nat64;
 };
+
 type OldBurn = {
     from : Account;
     amount : Balance;
     memo : ?Blob;
     created_at_time : ?Nat64;
 };
+
 type NewBurn = {
     amount : Nat;
     from : Account;
@@ -107,6 +112,7 @@ type NewBurn = {
     memo : ?Blob;
     created_at_time : ?Nat64;
 };
+
 type Approve = {
     amount : Nat;
     from : Account;
@@ -117,18 +123,16 @@ type Approve = {
     created_at_time : ?Nat64;
     fee : ?Nat;
 };
+
 type OldTransactionRange = {
     transactions: [OldTransaction];
 };
-
-type TxIndexes = List.List<TxIndex>;
 
 type OldSynchStatus = {
     tx_total : TxIndex;
     tx_synched : TxIndex;
 };
 
-// Arguments for a transfer operation
 type TransferArgs = {
     from_subaccount : ?Subaccount;
     to : Account;
@@ -137,7 +141,7 @@ type TransferArgs = {
     memo : ?Blob;
     created_at_time : ?Nat64;
 };
-// Arguments for a burn operation
+
 type BurnArgs = {
     from_subaccount : ?Subaccount;
     amount : Balance;
@@ -149,6 +153,7 @@ type TimeError = {
     #TooOld;
     #CreatedInFuture : { ledger_time : Timestamp };
 };
+
 type TransferError = TimeError or {
     #BadFee : { expected_fee : Balance };
     #BadBurn : { min_burn_amount : Balance };
@@ -157,10 +162,12 @@ type TransferError = TimeError or {
     #TemporarilyUnavailable;
     #GenericError : { error_code : Nat; message : Text };
 };
+
 type TransferResult = {
     #Ok : TxIndex;
     #Err : TransferError;
 };
+
 type ConvertError = TransferError or {
     #OnCooldown : { since : Int; remaining : Int; };
     #StaleIndexer : { txid: ?TxIndex };
@@ -178,18 +185,17 @@ type ConvertError = TransferError or {
         old_sent_dapp_to_acct_d12 : Balance;
     };
 };
+
 type ConvertResult = {
     #Ok : TxIndex;
     #Err : ConvertError;
 };
-type SynchStatus = {
-    tx_total : TxIndex;
-    tx_synched : TxIndex;
-};
+
 type IndexAccountResult = {
     #Ok : IndexedAccount;
     #Err : GetNewTransactionsErr;
 };
+
 type IndexedAccount = {
     new_total_balance_d8 : Balance;
     old_refundable_balance_d12 : Balance;
@@ -208,6 +214,7 @@ type IndexedAccount = {
     new_latest_send_found : Bool;
     new_latest_send_txid : ?TxIndex;
 };
+
 type IndexOldBalanceResult = {
     old_balance_d12 : Balance;
     old_balance_underflow_d12 : Balance;
@@ -217,6 +224,7 @@ type IndexOldBalanceResult = {
     old_latest_send_found : Bool;
     old_latest_send_txid : ?TxIndex;
 };
+
 type IndexNewBalanceResult = {
     new_sent_acct_to_dapp_d8 : Balance;
     new_sent_dapp_to_acct_d8 : Balance;
@@ -231,21 +239,26 @@ type GetCanisterIdsResult = {
     old_token_canister_id : Principal;
     old_indexer_canister_id : Principal;
 };
+
 type BurnOldTokensResult = {
     #Ok : TxIndex;
     #Err : BurnOldTokensErr;
 };
+
 type BurnOldTokensErr = ConvertError or {
     #IsNotController;
     #BurnsNotAllowed;
 };
+
 type RefundOldTokensResult = {
     #Ok : TxIndex;
     #Err : RefundOldTokensErr;
 };
+
 type RefundOldTokensErr = ConvertError or {
     #RefundsNotAllowed;
 };
+
 type Settings = {
   allow_conversions : Bool;
   allow_refunds : Bool;
@@ -257,7 +270,7 @@ type Settings = {
 
 type OldIndexerInterface = actor {
     get_account_transactions(account : Text) : async [OldTransaction];
-    synch_archive_full(token: Text) : async SynchStatus;
+    synch_archive_full(token: Text) : async OldSynchStatus;
 };  
 
 type NewIndexerInterface = actor {
