@@ -90,23 +90,16 @@ actor {
   stable var allow_seeder_conversions = false;
   stable var allow_burner_conversions = false;
 
-
-  // The account representing this dApp
-  let sneed_converter_dapp : T.Account = { 
-    owner = Principal.fromText("aaaaa-aa"); // TODO: Currently test canister id
-    subaccount = null; 
-  }; 
-
   // Transaction fees of new and old token
-  let new_fee_d8 = 1_000;
-  let old_fee_d12 = 100_000_000;
+  stable var new_fee_d8 = 1_000;
+  stable var old_fee_d12 = 100_000_000;
 
-  let d12_to_d8 : Int = 10_000; // 12 to 8 decimals
+  stable var  d12_to_d8 : Int = 10_000; // 12 to 8 decimals
 
   // An account sending this amount or more of the NEW token to the dApp is considered a "Seeder".
   // Seeders cannot use the "convert" function to return their funds if "allow_seeder_conversions" is false. 
   // This is expected to be the SNS Treasury, providing the NEW SNEED tokens for conversion.
-  let new_seeder_min_amount_d8 : T.Balance = 100_000_000_000; // 1000 NEW tokens
+  stable var new_seeder_min_amount_d8 : T.Balance = 100_000_000_000; // 1000 NEW tokens
   //let new_seeder_min_amount_d8 : T.Balance = 10_000;          - DEV! NEVER USE IN PRODUCTION!
 
   // An account sending this amount or more of the OLD token to the dApp is considered a "Burner".
@@ -115,18 +108,24 @@ actor {
   // This is expected to be the Sneed Team, providing the OLD SNEED tokens for burning.
   //let old_burner_min_amount_d12 : T.Balance = 100;              - DEV! NEVER USE IN PRODUCTION!
   //let old_burner_min_amount_d12 : T.Balance = 10_000_000_000;   - TEST! NEVER USE IN PRODUCTION!  // 0.01 OLD tokens
-  let old_burner_min_amount_d12 : T.Balance = 1000_000_000_000_000;  // 1000 OLD tokens
+  stable var old_burner_min_amount_d12 : T.Balance = 1000_000_000_000_000;  // 1000 OLD tokens
 
+
+  stable var cooldown_ns : Nat = 60000000000; // "1 minute ns"         - DEV! NEVER USE IN PRODUCTION!
+  //let cooldown_ns : Nat = 300000000000; // "5 minute ns"      - TEST! NEVER USE IN PRODUCTION!
+  //let cooldown_ns : Nat = 600000000000; // "10 minutes ns"    - OPTIMISTIC
+  //let cooldown_ns : Nat = 3600000000000; // "1 hour ns"       - PESSIMISTIC
 
   // Keep track of when the "convert" or "refund" function was most recently called for each
   // account, and enforce a cooldown preventing the functions being called too
   // frequently for a given account. This also prevents reentrancy issues.
   let cooldowns = Map.HashMap<Principal, Time.Time>(32, Principal.equal, Principal.hash);
-  let cooldown_ns : Nat = 60000000000; // "1 minute ns"         - DEV! NEVER USE IN PRODUCTION!
-  //let cooldown_ns : Nat = 300000000000; // "5 minute ns"      - TEST! NEVER USE IN PRODUCTION!
-  //let cooldown_ns : Nat = 600000000000; // "10 minutes ns"    - OPTIMISTIC
-  //let cooldown_ns : Nat = 3600000000000; // "1 hour ns"       - PESSIMISTIC
 
+  // The account representing this dApp
+  let sneed_converter_dapp : T.Account = { 
+    owner = Principal.fromText("aaaaa-aa"); // TODO: Currently test canister id
+    subaccount = null; 
+  }; 
 
 /// ACTORS ///
 
@@ -310,9 +309,7 @@ actor {
     if (IsInactive()) { return #Err(#NotActive); };
     
     // Ensure only controllers can call this function
-    if (Principal.isController(caller) == false) {
-      return #Err(#IsNotController);
-    };
+    assert Principal.isController(caller);
 
     //Burn old tokens
     await BurnOldTokens(amount);
@@ -328,6 +325,12 @@ actor {
       allow_burner_refunds = allow_burner_refunds;
       allow_seeder_conversions = allow_seeder_conversions;
       allow_burner_conversions = allow_burner_conversions;
+      new_fee_d8 = new_fee_d8;
+      old_fee_d12 = old_fee_d12;
+      d12_to_d8 = d12_to_d8;
+      new_seeder_min_amount_d8 = new_seeder_min_amount_d8;
+      old_burner_min_amount_d12 = old_burner_min_amount_d12;
+      cooldown_ns = cooldown_ns;
     };
   };
 
@@ -336,9 +339,7 @@ actor {
   public shared ({ caller }) func set_settings(new_settings : T.Settings) : async Bool {
 
     // Ensure only controllers can call this function
-    if (Principal.isController(caller) == false) {
-      return false;
-    };
+    assert Principal.isController(caller);
 
     allow_conversions := new_settings.allow_conversions;
     allow_refunds := new_settings.allow_refunds;
@@ -346,6 +347,12 @@ actor {
     allow_burner_refunds := new_settings.allow_burner_refunds;
     allow_seeder_conversions := new_settings.allow_seeder_conversions;
     allow_burner_conversions := new_settings.allow_burner_conversions;
+    new_fee_d8 := new_settings.new_fee_d8;
+    old_fee_d12 := new_settings.old_fee_d12;
+    d12_to_d8 := new_settings.d12_to_d8;
+    new_seeder_min_amount_d8 := new_settings.new_seeder_min_amount_d8;
+    old_burner_min_amount_d12 := new_settings.old_burner_min_amount_d12;
+    cooldown_ns := new_settings.cooldown_ns;
 
     true;
   };
@@ -365,9 +372,7 @@ actor {
   public shared ({ caller }) func set_new_token_canister_ids(new_token_canister_id : Text, new_indexer_canister_id : Text) : async Bool {
 
     // Ensure only controllers can call this function
-    if (Principal.isController(caller) == false) {
-      return false;
-    };
+    assert Principal.isController(caller);
 
     new_token_id := new_token_canister_id;
     new_indexer_id := new_indexer_canister_id;

@@ -266,6 +266,12 @@ type Settings = {
   allow_burner_refunds : Bool;
   allow_seeder_conversions : Bool;
   allow_burner_conversions : Bool;
+  new_fee_d8 : Balance;
+  old_fee_d12 : Balance;
+  d12_to_d8 : Int;
+  new_seeder_min_amount_d8 : Balance;
+  old_burner_min_amount_d12 : Balance;
+  cooldown_ns : Nat; 
 };
 
 type OldIndexerInterface = actor {
