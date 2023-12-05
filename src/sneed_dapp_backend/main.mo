@@ -100,21 +100,21 @@ actor {
   // Seeders cannot use the "convert" function to return their funds if "allow_seeder_conversions" is false. 
   // This is expected to be the SNS Treasury, providing the NEW SNEED tokens for conversion.
   stable var new_seeder_min_amount_d8 : T.Balance = 100_000_000_000; // 1000 NEW tokens
-  //let new_seeder_min_amount_d8 : T.Balance = 10_000;          - DEV! NEVER USE IN PRODUCTION!
+  //stable var new_seeder_min_amount_d8 : T.Balance = 10_000;          - DEV! NEVER USE IN PRODUCTION!
 
   // An account sending this amount or more of the OLD token to the dApp is considered a "Burner".
   // Burners cannot use the "convert" function to convert their funds if "allow_burner_conversions" is false. 
   // Burners cannot use the "refund" function to reclaim their funds if "allow_burner_refunds" is false. 
   // This is expected to be the Sneed Team, providing the OLD SNEED tokens for burning.
-  //let old_burner_min_amount_d12 : T.Balance = 100;              - DEV! NEVER USE IN PRODUCTION!
-  //let old_burner_min_amount_d12 : T.Balance = 10_000_000_000;   - TEST! NEVER USE IN PRODUCTION!  // 0.01 OLD tokens
+  //stable var old_burner_min_amount_d12 : T.Balance = 100;              - DEV! NEVER USE IN PRODUCTION!
+  //stable var old_burner_min_amount_d12 : T.Balance = 10_000_000_000;   // - TEST! NEVER USE IN PRODUCTION!  // 0.01 OLD tokens
   stable var old_burner_min_amount_d12 : T.Balance = 1000_000_000_000_000;  // 1000 OLD tokens
 
 
-  stable var cooldown_ns : Nat = 60000000000; // "1 minute ns"         - DEV! NEVER USE IN PRODUCTION!
-  //let cooldown_ns : Nat = 300000000000; // "5 minute ns"      - TEST! NEVER USE IN PRODUCTION!
-  //let cooldown_ns : Nat = 600000000000; // "10 minutes ns"    - OPTIMISTIC
-  //let cooldown_ns : Nat = 3600000000000; // "1 hour ns"       - PESSIMISTIC
+  //stable var cooldown_ns : Nat = 60000000000; // "1 minute ns"         - DEV! NEVER USE IN PRODUCTION!
+  //stable var cooldown_ns : Nat = 300000000000; // "5 minute ns"      - TEST! NEVER USE IN PRODUCTION!
+  //stable var cooldown_ns : Nat = 600000000000; // "10 minutes ns"    - OPTIMISTIC
+  stable var cooldown_ns : Nat = 3600000000000; // "1 hour ns"       - PESSIMISTIC
 
   // Keep track of when the "convert" or "refund" function was most recently called for each
   // account, and enforce a cooldown preventing the functions being called too
