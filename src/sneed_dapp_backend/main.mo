@@ -86,7 +86,7 @@ actor {
   stable var allow_conversions = true;
   stable var allow_refunds = true;
   stable var allow_burns = true;
-  stable var allow_burner_refunds = true;
+  stable var allow_burner_refunds = false;
   stable var allow_seeder_conversions = false;
   stable var allow_burner_conversions = false;
 
@@ -99,15 +99,15 @@ actor {
   // An account sending this amount or more of the NEW token to the dApp is considered a "Seeder".
   // Seeders cannot use the "convert" function to return their funds if "allow_seeder_conversions" is false. 
   // This is expected to be the SNS Treasury, providing the NEW SNEED tokens for conversion.
-  stable var new_seeder_min_amount_d8 : T.Balance = 100_000_000_000; // 1000 NEW tokens
   //stable var new_seeder_min_amount_d8 : T.Balance = 10_000;          - DEV! NEVER USE IN PRODUCTION!
+  stable var new_seeder_min_amount_d8 : T.Balance = 100_000_000_000; // 1000 NEW tokens
 
   // An account sending this amount or more of the OLD token to the dApp is considered a "Burner".
   // Burners cannot use the "convert" function to convert their funds if "allow_burner_conversions" is false. 
   // Burners cannot use the "refund" function to reclaim their funds if "allow_burner_refunds" is false. 
   // This is expected to be the Sneed Team, providing the OLD SNEED tokens for burning.
   //stable var old_burner_min_amount_d12 : T.Balance = 100;              - DEV! NEVER USE IN PRODUCTION!
-  //stable var old_burner_min_amount_d12 : T.Balance = 10_000_000_000;   // - TEST! NEVER USE IN PRODUCTION!  // 0.01 OLD tokens
+  //stable var old_burner_min_amount_d12 : T.Balance = 1_000_000_000;   // - TEST! NEVER USE IN PRODUCTION!  // 0.01 OLD tokens
   stable var old_burner_min_amount_d12 : T.Balance = 1000_000_000_000_000;  // 1000 OLD tokens
 
 
@@ -123,7 +123,7 @@ actor {
 
   // The account representing this dApp
   let sneed_converter_dapp : T.Account = { 
-    owner = Principal.fromText("aaaaa-aa"); // TODO: Currently test canister id
+    owner = Principal.fromText("aaaaa-aa"); // TODO: set to dApp canister id
     subaccount = null; 
   }; 
 
