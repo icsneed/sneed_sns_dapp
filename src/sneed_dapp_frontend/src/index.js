@@ -12,7 +12,8 @@ function toJsonString(o) {
 }
 
 function getSubaccount() {
-  var result = null;
+  //var result = null;
+  var result = new Uint8Array(32);
   var arr_sub = new Uint8Array(32);
   var cnt = 0;
 
@@ -186,7 +187,8 @@ document.querySelector("form").addEventListener("submit", async (e) => {
 
   const result = subaccount 
     ? await sneed_dapp_backend.get_subaccount(account, subaccount)
-    : await sneed_dapp_backend.get_account(account);
+    : await sneed_dapp_backend.get_account(account, subaccount);
+    //: await sneed_dapp_backend.get_account(account);
     
   const ok = result["Ok"];
   if (ok) {
