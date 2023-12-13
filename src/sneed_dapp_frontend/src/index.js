@@ -12,7 +12,6 @@ function toJsonString(o) {
 }
 
 function getSubaccount() {
-  //var result = null;
   var result = new Uint8Array(32);
   var arr_sub = new Uint8Array(32);
   var cnt = 0;
@@ -70,9 +69,7 @@ document.getElementById("convert").addEventListener("click", async (e) => {
   document.getElementById("result").innerHTML = "<img src='loading-gif.gif' width='48' height='48' />";
 
 
-  const result = subaccount 
-    ? await sneed_dapp_backend.convert_subaccount(account, subaccount)
-    : await sneed_dapp_backend.convert_account(account);
+  const result = await sneed_dapp_backend.convert_account(account, subaccount);
 
   const ok = result["Ok"];
   if (ok) {
@@ -128,9 +125,7 @@ document.getElementById("refund").addEventListener("click", async (e) => {
 
   document.getElementById("result").innerHTML = "<img src='loading-gif.gif' width='48' height='48' />";
 
-  const result = subaccount 
-    ? await sneed_dapp_backend.refund_subaccount(account, subaccount)
-    : await sneed_dapp_backend.refund_account(account);
+  const result = await sneed_dapp_backend.refund_account(account, subaccount);
 
   const ok = result["Ok"];
   if (ok) {
@@ -185,10 +180,7 @@ document.querySelector("form").addEventListener("submit", async (e) => {
   document.getElementById("balance").innerHTML = "<img src='loading-gif.gif' width='48' height='48' />";
   document.getElementById("refundable").innerHTML = "";
 
-  const result = subaccount 
-    ? await sneed_dapp_backend.get_subaccount(account, subaccount)
-    : await sneed_dapp_backend.get_account(account, subaccount);
-    //: await sneed_dapp_backend.get_account(account);
+  const result = await sneed_dapp_backend.get_account(account, subaccount);
     
   const ok = result["Ok"];
   if (ok) {

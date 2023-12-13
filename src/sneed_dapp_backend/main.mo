@@ -146,22 +146,7 @@ shared ({ caller = _initializer_ }) actor class SneedUpgrade() = this {
 /// PUBLIC API ///
 
   // Returns the status of an account 
-  public func get_account(owner : Text) : async T.IndexAccountResult {
-
-    // Ensure the dApp has been activated (the canisters for the NEW token its indexer have been assigned)
-    if (IsInactive()) { return #Err( { message = "Converter application has not yet been activated."; } ); };
-
-    let account : T.Account = {
-      owner = Principal.fromText(owner);
-      subaccount = null;
-    };
- 
-    await IndexAccount(account);
-
-  };
-
-  // Returns the status of a subaccount 
-  public func get_subaccount(owner : Text, subaccount: T.Subaccount) : async T.IndexAccountResult {
+  public func get_account(owner : Text, subaccount: T.Subaccount) : async T.IndexAccountResult {
 
     // Ensure the dApp has been activated (the canisters for the NEW token its indexer have been assigned)
     if (IsInactive()) { return #Err( { message = "Converter application has not yet been activated."; } ); };
@@ -185,34 +170,7 @@ shared ({ caller = _initializer_ }) actor class SneedUpgrade() = this {
   // After tokens for an account have been converted,
   // a cooldown prevents users from calling the "convert" (or "refund") function 
   // for that same account again before the specified cooldown period has passed.
-  public func convert_account(owner : Text) : async T.ConvertResult {
-
-    // Ensure the dApp has been activated (the canisters for the NEW token its indexer have been assigned)
-    if (IsInactive()) { return #Err(#NotActive); };
-
-    let account : T.Account = {
-      owner = Principal.fromText(owner);
-      subaccount = null;
-    };
-
-    // Ensure the account is not on cooldown.
-    if (OnCooldown(account.owner)) {
-      return #Err(#OnCooldown { 
-        since = CooldownSince(account.owner); 
-        remaining = CooldownRemaining(account.owner); })
-    };
-
-    // The account was not on cooldown, so we start 
-    // the cooldown timer and proceed with the conversion
-    cooldowns.put(account.owner, Time.now());
-
-    // Convert from old to new tokens.
-    await ConvertOldTokens(account, null);
-    
-  };
-
-  // Convert from old token to new token for a subaccount. 
-  public func convert_subaccount(owner : Text, subaccount: T.Subaccount) : async T.ConvertResult {
+  public func convert_account(owner : Text, subaccount: T.Subaccount) : async T.ConvertResult {
 
     // Ensure the dApp has been activated (the canisters for the NEW token its indexer have been assigned)
     if (IsInactive()) { return #Err(#NotActive); };
@@ -246,34 +204,7 @@ shared ({ caller = _initializer_ }) actor class SneedUpgrade() = this {
   // After tokens for an account have been refunded,
   // a cooldown prevents users from calling the "refund" (or "convert") function 
   // for that same account again before the specified cooldown period has passed.
-  public func refund_account(owner : Text) : async T.RefundOldTokensResult {
-
-    // Ensure the dApp has been activated (the canisters for the NEW token its indexer have been assigned)
-    if (IsInactive()) { return #Err(#NotActive); };
-
-    let account : T.Account = {
-      owner = Principal.fromText(owner);
-      subaccount = null;
-    };
-
-    // Ensure the account is not on cooldown.
-    if (OnCooldown(account.owner)) {
-      return #Err(#OnCooldown { 
-        since = CooldownSince(account.owner); 
-        remaining = CooldownRemaining(account.owner); })
-    };
-
-    // The account was not on cooldown, so we start 
-    // the cooldown timer and proceed with the refund
-    cooldowns.put(account.owner, Time.now());
-
-    // Refund old tokens.
-    await RefundOldTokens(account, null);
-    
-  };
-
-  // Refund old tokens for a subaccount. 
-  public func refund_subaccount(owner : Text, subaccount: T.Subaccount) : async T.RefundOldTokensResult {
+  public func refund_account(owner : Text, subaccount: T.Subaccount) : async T.RefundOldTokensResult {
 
     // Ensure the dApp has been activated (the canisters for the NEW token its indexer have been assigned)
     if (IsInactive()) { return #Err(#NotActive); };
