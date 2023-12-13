@@ -60,7 +60,7 @@ import Error "mo:base/Error";
 
 import T "Types";
 
-actor {
+shared ({ caller = _initializer_ }) actor class SneedUpgrade() = this {
 
 /// VARIABLES ///
 
@@ -122,10 +122,12 @@ actor {
   let cooldowns = Map.HashMap<Principal, Time.Time>(32, Principal.equal, Principal.hash);
 
   // The account representing this dApp
-  let sneed_converter_dapp : T.Account = { 
-    owner = Principal.fromText("aaaaa-aa"); // TODO: set to dApp canister id
-    subaccount = null; 
-  }; 
+  func sneed_converter_account() : T.Account {
+    {
+      owner = Principal.fromActor(this);
+      subaccount = null;
+    };    
+  };
 
 /// ACTORS ///
 
@@ -775,6 +777,9 @@ actor {
     // is found in the list of transactions from the OLD token indexer.
     var old_latest_send_found = false;
 
+    // Assign an instance of the this dApp to a local variable for efficiency.
+    let sneed_converter_dapp = sneed_converter_account();
+
     // Iterate over all the OLD token transactions for the account
     for (tx in transactions.vals()) {
 
@@ -854,6 +859,9 @@ actor {
     // Track if the most recent NEW token transfer transaction from the dApp to the account (if any)
     // is found in the list of transactions from the NEW token indexer.
     var new_latest_send_found = false;
+
+        // Assign an instance of the this dApp to a local variable for efficiency.
+    let sneed_converter_dapp = sneed_converter_account();
 
     // Iterate over all the NEW token transactions for the account
     for (transaction in transactions.vals()) {
@@ -968,4 +976,5 @@ actor {
     stable_new_latest_sent_txids := [];
     stable_old_latest_sent_txids := [];
   };
+
 };
