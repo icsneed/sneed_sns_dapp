@@ -16,6 +16,10 @@
         "dist/sneed_dapp_frontend/"
       ],
       "type": "assets"
+    },
+    "sneed_dapp_tests": {
+      "main": "tests/tests.mo",
+      "type": "motoko"
     }
   },
   "defaults": {

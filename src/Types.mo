@@ -18,6 +18,45 @@ type Subaccount = Blob;
 type TxIndex = Nat;
 type Balance = Nat;
 type TxIndexes = List.List<TxIndex>;
+     
+type ConverterContext = {
+    caller : Principal;
+    state : ConverterState;
+    account : Account;
+    converter : Account;
+};
+
+type ConverterState = {
+
+    persistent : ConverterPersistentState;
+    ephemeral : ConverterEphemeralState;
+
+};
+
+type ConverterPersistentState = {
+
+    var new_token_id : Text; 
+    var new_indexer_id : Text; 
+    var old_token_id : Text;
+    var old_indexer_id : Text; 
+
+    var stable_new_latest_sent_txids : [(Principal, TxIndex)];
+    var stable_old_latest_sent_txids : [(Principal, TxIndex)];
+
+    var old_token_canister : TokenInterface;
+    var old_indexer_canister : OldIndexerInterface;
+    var new_token_canister : TokenInterface;
+    var new_indexer_canister : NewIndexerInterface; 
+
+    var settings : Settings;
+
+};
+
+type ConverterEphemeralState = {
+    var new_latest_sent_txids : Map.HashMap<Principal, TxIndex>;
+    var old_latest_sent_txids : Map.HashMap<Principal, TxIndex>;
+    var cooldowns : Map.HashMap<Principal, Time.Time>;
+};
 
 type Account = {
     owner : Principal;
@@ -272,6 +311,13 @@ type Settings = {
   new_seeder_min_amount_d8 : Balance;
   old_burner_min_amount_d12 : Balance;
   cooldown_ns : Nat; 
+};
+
+type ConverterInterface = actor {
+    get_account(account: Account) : async IndexAccountResult;
+    convert_account(account: Account) : async ConvertResult;
+    refund_account(account: Account) : async RefundOldTokensResult;
+    burn_old_tokens(amount : Balance) : async BurnOldTokensResult;
 };
 
 type OldIndexerInterface = actor {
