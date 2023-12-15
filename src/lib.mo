@@ -49,6 +49,7 @@ import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
 import Text "mo:base/Text";
 import Iter "mo:base/Iter";
+import Blob "mo:base/Blob";
 import Array "mo:base/Array";
 import Hash "mo:base/Hash";
 import Map "mo:base/HashMap";
@@ -190,6 +191,9 @@ module {
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
     if (IsInactive(context)) { return #Err( { message = "Converter application has not yet been activated."; } ); };
 
+    // Ensure account is valid
+    if (not ValidateAccount(context.account)) { return #Err( { message = "Invalid account."; } ); };
+
     await* IndexAccount(context);
 
   };
@@ -208,6 +212,9 @@ module {
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
     if (IsInactive(context)) { return #Err(#NotActive); };
+
+    // Ensure account is valid
+    if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
 
     // Ensure the account is not on cooldown.
     if (OnCooldown(context, context.account.owner)) {
@@ -237,6 +244,9 @@ module {
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
     if (IsInactive(context)) { return #Err(#NotActive); };
+
+    // Ensure account is valid
+    if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
 
     // Ensure the account is not on cooldown.
     if (OnCooldown(context, context.account.owner)) {
@@ -800,16 +810,16 @@ module {
           // including transactions for subaccounts. Thus we have to filter down
           // to transactions that fully match our given account in either
           // the "from" field or the "to" field, using a comparison that includes the subaccount. 
-          if (transfer.from == account or transfer.to == account) {
+          if (CompareAccounts(transfer.from, account) or CompareAccounts(transfer.to, account)) {
 
             // This transaction is from the dApp to the account. 
             // Increase the old_sent_dapp_to_acct_d12 counter by the amount.
-            if (transfer.from == sneed_converter_dapp) { old_sent_dapp_to_acct_d12 := old_sent_dapp_to_acct_d12 + transfer.amount; };
+            if (CompareAccounts(transfer.from, sneed_converter_dapp)) { old_sent_dapp_to_acct_d12 := old_sent_dapp_to_acct_d12 + transfer.amount; };
 
             // This transaction is from the account to the dApp. 
             // Increase the old_sent_acct_to_dapp_d12 counter by the amount minus the OLD token fee.
             // NB: In the OLD token, the amount is inclusive of the fee.
-            if (transfer.to == sneed_converter_dapp) { old_sent_acct_to_dapp_d12 := old_sent_acct_to_dapp_d12 + (transfer.amount - settings.old_fee_d12); };
+            if (CompareAccounts(transfer.to, sneed_converter_dapp)) { old_sent_acct_to_dapp_d12 := old_sent_acct_to_dapp_d12 + (transfer.amount - settings.old_fee_d12); };
 
           }
         };
@@ -894,16 +904,16 @@ module {
           // The NEW token indexer does support listing transactions per subaccount, 
           // but we still verify that the transaction matches the specifiec account 
           // in either the "from" field or the "to" field (using a comparison that includes the subaccount.)
-          if (transfer.from == account or transfer.to == account) {
+          if (CompareAccounts(transfer.from, account) or CompareAccounts(transfer.to, account)) {
 
             // This transaction is from the dApp to the account. 
             // Increase the new_sent_dapp_to_acct_d8 counter by the amount plus the NEW token fee.
             // In the NEW token, the amount is exclusive of the fee.
-            if (transfer.from == sneed_converter_dapp) { new_sent_dapp_to_acct_d8 := new_sent_dapp_to_acct_d8 + (transfer.amount + settings.new_fee_d8) };
+            if (CompareAccounts(transfer.from, sneed_converter_dapp)) { new_sent_dapp_to_acct_d8 := new_sent_dapp_to_acct_d8 + (transfer.amount + settings.new_fee_d8) };
 
             // This transaction is from the account to the dApp. 
             // Increase the new_sent_acct_to_dapp_d8 counter by the amount.
-            if (transfer.to == sneed_converter_dapp) { new_sent_acct_to_dapp_d8 := new_sent_acct_to_dapp_d8 + transfer.amount; };
+            if (CompareAccounts(transfer.to, sneed_converter_dapp)) { new_sent_acct_to_dapp_d8 := new_sent_acct_to_dapp_d8 + transfer.amount; };
 
           };
         };
@@ -982,6 +992,41 @@ module {
         };
       };
     };
+  };
+
+  public func CompareAccounts(account1 : T.Account, account2 : T.Account) : Bool {
+    if (account1.owner != account2.owner) { return false; };
+    if (account1.subaccount == null and account2.subaccount == null) { return true; };
+    if (account1.subaccount == null and account2.subaccount 
+          == ?Blob.fromArray([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])) { return true; };
+    if (account1.subaccount == ?Blob.fromArray([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+         and account2.subaccount == null) { return true; };
+
+    account1.subaccount == account2.subaccount;
+  };
+
+// Taken from https://github.com/NatLabs/icrc1
+  // Checks if a subaccount is valid
+  public func ValidateSubaccount(subaccount : ?T.Subaccount) : Bool {
+      switch (subaccount) {
+          case (?bytes) {
+              bytes.size() == 32;
+          };
+          case (_) true;
+      };
+  };
+
+// Taken from https://github.com/NatLabs/icrc1
+  // Checks if an account is valid
+  public func ValidateAccount(account : T.Account) : Bool {
+      let is_anonymous = Principal.isAnonymous(account.owner);
+      let invalid_size = Principal.toBlob(account.owner).size() > 29;
+
+      if (is_anonymous or invalid_size) {
+          false;
+      } else {
+          ValidateSubaccount(account.subaccount);
+      };
   };
 
 

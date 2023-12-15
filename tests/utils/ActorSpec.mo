@@ -1,3 +1,4 @@
+// Taken from https://github.com/NatLabs/icrc1
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";

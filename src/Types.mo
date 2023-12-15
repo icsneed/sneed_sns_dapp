@@ -208,6 +208,7 @@ type TransferResult = {
 };
 
 type ConvertError = TransferError or {
+    #InvalidAccount;
     #OnCooldown : { since : Int; remaining : Int; };
     #StaleIndexer : { txid: ?TxIndex };
     #IsSeeder;
