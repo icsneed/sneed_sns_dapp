@@ -60,6 +60,31 @@ module {
         };
     };
 
+    public func get_caller_active_context(caller : Principal) : T.ConverterContext {
+
+        let account : T.Account = { 
+            owner = Principal.fromText("cpi23-5qaaa-aaaag-qcs5a-cai");
+            subaccount = null;
+        };
+        let converter : T.Account = { 
+            owner = Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai");
+            subaccount = null;
+        };
+
+        let state = Converter.init();
+
+        let context = {
+            caller = caller;
+            state = state;
+            account = account;
+            converter = converter;
+        };
+
+        let waste = Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai");
+
+        return context;
+    };
+
     public func get_converter_subaccount() : T.Account {
         {
             owner = Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai");
