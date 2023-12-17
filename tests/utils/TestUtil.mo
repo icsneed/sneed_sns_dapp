@@ -16,13 +16,15 @@ import T "../../src/Types";
 
 import ActorSpec "ActorSpec";
 
-import TokenMock "../mocks/TokenCanisterMock";
-import OldIndexerMock "../mocks/OldIndexerCanisterMock";
-import NewIndexerMock "../mocks/NewIndexerCanisterMock";
-
 module {
 
-
+    let test_ids : [Text] = [
+        "cpi23-5qaaa-aaaag-qcs5a-cai",
+        "rkf6t-7iaaa-aaaag-qco6a-cai",
+        "auzum-qe7jl-z2f6l-rwp3r-wkr4f-3rcz3-l7ejm-ltcku-c45fw-w7pi4-hqe",        
+        "ehi5s-vxa47-cjckw-4dnt2-3kxk4-shngz-thwy2-5umya-2rij2-rllds-wqe",
+        "ltnvn-spenv-hileg-coyda-gclul-yqibf-pr3q6-vndkr-p5tdi-6ypip-cqe"
+    ];
 
     public func get_context() : T.ConverterContext {
 
@@ -33,10 +35,12 @@ module {
 
     public func get_caller_context(caller : Principal) : T.ConverterContext {
 
-        let account : T.Account = { 
-            owner = Principal.fromText("cpi23-5qaaa-aaaag-qcs5a-cai");
-            subaccount = null;
-        };
+        get_caller_account_context(caller, get_test_account(0))
+
+    };
+
+    public func get_caller_account_context(caller : Principal, account : T.Account) : T.ConverterContext {
+
         let converter : T.Account = { 
             owner = Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai");
             subaccount = null;
@@ -65,9 +69,8 @@ module {
         return context;
     };
 
-    public func get_context_with_mocks(caller : Principal) : T.ConverterContext {
+    private func set_mocks(context : T.ConverterContext) {
 
-        let context = get_caller_context(caller);
         Converter.set_canister_ids(
             context, 
             "cgpjn-omaaa-aaaaa-qaakq-cai", 
@@ -75,7 +78,27 @@ module {
             "cuj6u-c4aaa-aaaaa-qaajq-cai", 
             "ctiya-peaaa-aaaaa-qaaja-cai");
 
+    };
+
+    public func get_context_with_mocks(caller : Principal) : T.ConverterContext {
+
+        let context = get_caller_context(caller);
+        set_mocks(context);
         return context;
+    };
+
+    public func get_account_context_with_mocks(caller : Principal, account : T.Account) : T.ConverterContext {
+
+        let context = get_caller_account_context(caller, account);
+        set_mocks(context);
+        return context;
+    };
+
+    public func get_test_account(index : Nat) : T.Account {
+        {
+            owner = Principal.fromText(test_ids[index]);
+            subaccount = null;
+        }
     };
 
     public func get_converter_subaccount() : T.Account {
@@ -106,30 +129,16 @@ module {
         };
     };
 
-    public func get_test_account1() : T.Account {
-        {
-            owner = Principal.fromText("auzum-qe7jl-z2f6l-rwp3r-wkr4f-3rcz3-l7ejm-ltcku-c45fw-w7pi4-hqe");
-            subaccount = null;
-        };
-    };
-
-    public func get_test_account2() : T.Account {
-        {
-            owner = Principal.fromText("rkf6t-7iaaa-aaaag-qco6a-cai");
-            subaccount = null;
-        };
-    };
-
     public func get_old_acct_to_dapp_tx(context : T.ConverterContext, index : T.TxIndex, amount : T.Balance) 
-        : T.OldTransaction { get_old_tx(context, index, amount, context.account, context.converter); };
+        : T.OldTransaction { get_old_tx(index, amount, context.account, context.converter); };
 
     public func get_old_dapp_to_acct_tx(context : T.ConverterContext, index : T.TxIndex, amount : T.Balance) 
         : T.OldTransaction { 
         context.state.ephemeral.old_latest_sent_txids.put(context.account.owner, index);
-        get_old_tx(context, index, amount, context.converter, context.account); 
+        get_old_tx(index, amount, context.converter, context.account); 
     };
 
-    public func get_old_tx(context : T.ConverterContext, index : T.TxIndex, amount : T.Balance, from : T.Account, to : T.Account) : T.OldTransaction {
+    public func get_old_tx(index : T.TxIndex, amount : T.Balance, from : T.Account, to : T.Account) : T.OldTransaction {
         let timestamp : T.Timestamp = Nat64.fromNat(Int.abs(Time.now()));
         return {
             kind = "TRANSFER";
@@ -149,15 +158,15 @@ module {
     };
 
     public func get_new_acct_to_dapp_tx(context : T.ConverterContext, index : T.TxIndex, amount : T.Balance) 
-        : T.NewTransactionWithId { get_new_tx(context, index, amount, context.account, context.converter); };
+        : T.NewTransactionWithId { get_new_tx(index, amount, context.account, context.converter); };
 
     public func get_new_dapp_to_acct_tx(context : T.ConverterContext, index : T.TxIndex, amount : T.Balance) 
         : T.NewTransactionWithId {     
         context.state.ephemeral.new_latest_sent_txids.put(context.account.owner, index);
-        get_new_tx(context, index, amount, context.converter, context.account); 
+        get_new_tx(index, amount, context.converter, context.account); 
     };
 
-    public func get_new_tx(context : T.ConverterContext, index : T.TxIndex, amount : T.Balance, from : T.Account, to : T.Account) : T.NewTransactionWithId {
+    public func get_new_tx(index : T.TxIndex, amount : T.Balance, from : T.Account, to : T.Account) : T.NewTransactionWithId {
         let timestamp : T.Timestamp = Nat64.fromNat(Int.abs(Time.now()));
         return {
             id = index;

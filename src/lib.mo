@@ -333,27 +333,6 @@ module {
     state.persistent.new_indexer_canister := actor (new_indexer_canister_id);
   };
 
-  // Available for tests only, allowing them to set up mock collaborators.
-  public func set_canister_mocks(
-    context : T.ConverterContext, 
-    old_token_canister_mock : T.TokenInterface, 
-    old_indexer_canister_mock : T.OldIndexerInterface, 
-    new_token_canister_mock : T.TokenInterface, 
-    new_indexer_canister_mock : T.NewIndexerInterface) : () {
-
-    // Ensure only controllers can call this function
-    assert Principal.isController(context.caller);
-
-    // Extract state from context
-    let state = context.state;
-
-    state.persistent.old_token_canister := old_token_canister_mock;
-    state.persistent.old_indexer_canister := old_indexer_canister_mock;
-    state.persistent.new_token_canister := new_token_canister_mock;
-    state.persistent.new_indexer_canister := new_indexer_canister_mock;
-  };
-
-
 /// PRIVATE FUNCTIONS ///
 
   // Convert from OLD tokens to NEW tokens for a specified account.

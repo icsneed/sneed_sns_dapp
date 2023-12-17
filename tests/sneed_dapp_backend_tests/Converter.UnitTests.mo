@@ -394,15 +394,15 @@ module {
                         let tx2 = TestUtil.get_old_acct_to_dapp_tx(context, 105, old_amount2_d12 + old_fee_d12);
                         let tx3 = TestUtil.get_old_dapp_to_acct_tx(context, 125, old_amount3_d12 + old_fee_d12);
 
-                        let tx_ignore = TestUtil.get_old_tx(context, 90, old_amount4_d12, context.converter, TestUtil.get_test_account1());
-                        let tx_ignore2 = TestUtil.get_old_tx(context, 95, old_amount4_d12, TestUtil.get_test_account1(), context.converter);
-                        let tx_ignore3 = TestUtil.get_old_tx(context, 103, old_amount4_d12, context.account, TestUtil.get_test_account1());
-                        let tx_ignore4 = TestUtil.get_old_tx(context, 110, old_amount4_d12, TestUtil.get_test_account1(), context.account);
-                        let tx_ignore5 = TestUtil.get_old_tx(context, 115, old_amount4_d12, TestUtil.get_test_account1(), TestUtil.get_test_account2());
+                        let tx_ignore = TestUtil.get_old_tx(90, old_amount4_d12, context.converter, TestUtil.get_test_account(1));
+                        let tx_ignore2 = TestUtil.get_old_tx(95, old_amount4_d12, TestUtil.get_test_account(1), context.converter);
+                        let tx_ignore3 = TestUtil.get_old_tx(103, old_amount4_d12, context.account, TestUtil.get_test_account(1));
+                        let tx_ignore4 = TestUtil.get_old_tx(110, old_amount4_d12, TestUtil.get_test_account(1), context.account);
+                        let tx_ignore5 = TestUtil.get_old_tx(115, old_amount4_d12, TestUtil.get_test_account(1), TestUtil.get_test_account(2));
 
                         // Different subaccounts should also be ignored
-                        let tx_ignore6 = TestUtil.get_old_tx(context, 145, old_amount4_d12, TestUtil.get_test_subaccount(), context.converter);
-                        let tx_ignore7 = TestUtil.get_old_tx(context, 155, old_amount4_d12, TestUtil.get_converter_subaccount(), context.account);
+                        let tx_ignore6 = TestUtil.get_old_tx(145, old_amount4_d12, TestUtil.get_test_subaccount(), context.converter);
+                        let tx_ignore7 = TestUtil.get_old_tx(155, old_amount4_d12, TestUtil.get_converter_subaccount(), context.account);
 
                         let transactions : [T.OldTransaction] = [ tx_ignore, tx_ignore2, tx, tx_ignore3, tx2, tx_ignore4, tx_ignore5, tx3, tx_ignore6, tx_ignore7 ];
 
@@ -436,15 +436,15 @@ module {
                         let tx2 = TestUtil.get_new_acct_to_dapp_tx(context, 105, new_amount2_d8);
                         let tx3 = TestUtil.get_new_dapp_to_acct_tx(context, 125, new_amount3_d8);
 
-                        let tx_ignore = TestUtil.get_new_tx(context, 90, old_amount4_d12, context.converter, TestUtil.get_test_account1());
-                        let tx_ignore2 = TestUtil.get_new_tx(context, 95, old_amount4_d12, TestUtil.get_test_account1(), context.converter);
-                        let tx_ignore3 = TestUtil.get_new_tx(context, 103, old_amount4_d12, context.account, TestUtil.get_test_account1());
-                        let tx_ignore4 = TestUtil.get_new_tx(context, 110, old_amount4_d12, TestUtil.get_test_account1(), context.account);
-                        let tx_ignore5 = TestUtil.get_new_tx(context, 115, old_amount4_d12, TestUtil.get_test_account1(), TestUtil.get_test_account2());
+                        let tx_ignore = TestUtil.get_new_tx(90, old_amount4_d12, context.converter, TestUtil.get_test_account(1));
+                        let tx_ignore2 = TestUtil.get_new_tx(95, old_amount4_d12, TestUtil.get_test_account(1), context.converter);
+                        let tx_ignore3 = TestUtil.get_new_tx(103, old_amount4_d12, context.account, TestUtil.get_test_account(1));
+                        let tx_ignore4 = TestUtil.get_new_tx(110, old_amount4_d12, TestUtil.get_test_account(1), context.account);
+                        let tx_ignore5 = TestUtil.get_new_tx(115, old_amount4_d12, TestUtil.get_test_account(1), TestUtil.get_test_account(2));
 
                         // Different subaccounts should also be ignored
-                        let tx_ignore6 = TestUtil.get_new_tx(context, 145, old_amount4_d12, TestUtil.get_test_subaccount(), context.converter);
-                        let tx_ignore7 = TestUtil.get_new_tx(context, 155, old_amount4_d12, TestUtil.get_converter_subaccount(), context.account);
+                        let tx_ignore6 = TestUtil.get_new_tx(145, old_amount4_d12, TestUtil.get_test_subaccount(), context.converter);
+                        let tx_ignore7 = TestUtil.get_new_tx(155, old_amount4_d12, TestUtil.get_converter_subaccount(), context.account);
 
                         let transactions : [T.NewTransactionWithId] = [ tx_ignore, tx_ignore2, tx, tx_ignore3, tx2, tx_ignore4, tx_ignore5, tx3, tx_ignore6, tx_ignore7 ];
 
@@ -474,8 +474,8 @@ module {
                         let old_total_d12 = old_acct_sent_total_d12 - old_amount3_d12 - old_fee_d12; // 2.4999 tokens
 
                         //amount is inclusive of fee for old token
-                        let tx = TestUtil.get_old_tx(context, 100, old_amount_d12 + old_fee_d12, context.account, TestUtil.get_converter_zeroes_subaccount());
-                        let tx2 = TestUtil.get_old_tx(context, 105, old_amount2_d12 + old_fee_d12, TestUtil.get_test_zeroes_subaccount(), context.converter);
+                        let tx = TestUtil.get_old_tx(100, old_amount_d12 + old_fee_d12, context.account, TestUtil.get_converter_zeroes_subaccount());
+                        let tx2 = TestUtil.get_old_tx(105, old_amount2_d12 + old_fee_d12, TestUtil.get_test_zeroes_subaccount(), context.converter);
                         let tx3 = TestUtil.get_old_dapp_to_acct_tx(context, 125, old_amount3_d12 + old_fee_d12);
                         let transactions : [T.OldTransaction] = [ tx, tx2, tx3 ];
 
@@ -504,8 +504,8 @@ module {
                         let new_total_d8 = new_acct_sent_total_d8 - new_amount3_d8 - new_fee_d8; // 2.4999 tokens
 
                         //amount is exclusive of fee for new token
-                        let tx = TestUtil.get_new_tx(context, 100, new_amount_d8, context.account, TestUtil.get_converter_zeroes_subaccount());
-                        let tx2 = TestUtil.get_new_tx(context, 105, new_amount2_d8, TestUtil.get_test_zeroes_subaccount(), context.converter);
+                        let tx = TestUtil.get_new_tx(100, new_amount_d8, context.account, TestUtil.get_converter_zeroes_subaccount());
+                        let tx2 = TestUtil.get_new_tx(105, new_amount2_d8, TestUtil.get_test_zeroes_subaccount(), context.converter);
                         let tx3 = TestUtil.get_new_dapp_to_acct_tx(context, 125, new_amount3_d8);
                         let transactions : [T.NewTransactionWithId] = [ tx, tx2, tx3 ];
 
