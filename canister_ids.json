@@ -1,0 +1,20 @@
+{
+  "sneed_dapp_backend": {
+    "ic": "czysu-eaaaa-aaaag-qcvdq-cai"
+  },
+  "sneed_dapp_frontend": {
+    "ic": "duww2-liaaa-aaaag-qcvea-cai"
+  },
+  "sneed_dapp_old_token_mock": {
+    "local": "cgpjn-omaaa-aaaaa-qaakq-cai"
+  },
+  "sneed_dapp_new_token_mock": {
+    "local": "cuj6u-c4aaa-aaaaa-qaajq-cai"
+  },
+  "sneed_dapp_old_indexer_mock": {
+    "local": "cbopz-duaaa-aaaaa-qaaka-cai"
+  },
+  "sneed_dapp_new_indexer_mock": {
+    "local": "ctiya-peaaa-aaaaa-qaaja-cai"
+  }
+}

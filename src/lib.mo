@@ -319,7 +319,7 @@ module {
     old_token_canister_id : Text, 
     old_indexer_canister_id : Text, 
     new_token_canister_id : Text, 
-    new_indexer_canister_id : Text) : Bool {
+    new_indexer_canister_id : Text) : () {
 
     // Ensure only controllers can call this function
     assert Principal.isController(context.caller);
@@ -331,9 +331,28 @@ module {
     state.persistent.old_indexer_canister := actor (old_indexer_canister_id);
     state.persistent.new_token_canister := actor (new_token_canister_id);
     state.persistent.new_indexer_canister := actor (new_indexer_canister_id);
-
-    true;
   };
+
+  // Available for tests only, allowing them to set up mock collaborators.
+  public func set_canister_mocks(
+    context : T.ConverterContext, 
+    old_token_canister_mock : T.TokenInterface, 
+    old_indexer_canister_mock : T.OldIndexerInterface, 
+    new_token_canister_mock : T.TokenInterface, 
+    new_indexer_canister_mock : T.NewIndexerInterface) : () {
+
+    // Ensure only controllers can call this function
+    assert Principal.isController(context.caller);
+
+    // Extract state from context
+    let state = context.state;
+
+    state.persistent.old_token_canister := old_token_canister_mock;
+    state.persistent.old_indexer_canister := old_indexer_canister_mock;
+    state.persistent.new_token_canister := new_token_canister_mock;
+    state.persistent.new_indexer_canister := new_indexer_canister_mock;
+  };
+
 
 /// PRIVATE FUNCTIONS ///
 

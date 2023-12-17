@@ -64,7 +64,7 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
       old_token_canister_id : Text, 
       old_indexer_canister_id : Text, 
       new_token_canister_id : Text, 
-      new_indexer_canister_id : Text) : async Bool {
+      new_indexer_canister_id : Text) : async () {
       Converter.set_canister_ids(
         get_context_with_anon_account(caller),
         old_token_canister_id, 

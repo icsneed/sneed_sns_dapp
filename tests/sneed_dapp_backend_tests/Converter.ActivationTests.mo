@@ -30,7 +30,7 @@ module {
         } = ActorSpec;
 
         return describe(
-            "SneedConverter dApp Integration Tests",
+            "SneedConverter dApp Activation Tests",
             [
                 it(
                     "Should not be able to call get_account before activation.",
@@ -135,25 +135,7 @@ module {
                         };
 
                     },
-                ) /*,
-                it(
-                    "Get indexing information for account.",
-                    do {
-
-                        let context = get_context();
-                        switch (await* Converter.get_account(context)) {
-                            case (#Err(error)) { Debug.trap(error.message); false; };
-                            case (#Ok(account)) {
-
-                                assertAllTrue([
-                                    account.new_total_balance_d8 == 1                             
-                                ]);
-
-                            };
-                        };
-
-                    },
-                )*/
+                ) 
             ]
         );
     };

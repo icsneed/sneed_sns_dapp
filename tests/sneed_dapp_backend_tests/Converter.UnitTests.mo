@@ -600,7 +600,7 @@ module {
                         let context = TestUtil.get_caller_context(controller);
                         let old_canister_ids = Converter.get_canister_ids(context);
 
-                        let ok = Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "duww2-liaaa-aaaag-qcvea-cai", "cpi23-5qaaa-aaaag-qcs5a-cai", "ahw5u-keaaa-aaaaa-qaaha-cai");
+                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "duww2-liaaa-aaaag-qcvea-cai", "cpi23-5qaaa-aaaag-qcs5a-cai", "ahw5u-keaaa-aaaaa-qaaha-cai");
                         let new_canister_ids = Converter.get_canister_ids(context);
 
                         assertAllTrue([ 
@@ -620,13 +620,13 @@ module {
                     do {
                         let context = TestUtil.get_caller_context(controller);
                         let active0 = Converter.IsActive(context);
-                        let ok1 = Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae", "2vxsx-fae", "2vxsx-fae");
+                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae", "2vxsx-fae", "2vxsx-fae");
                         let active1 = Converter.IsActive(context);
-                        let ok2 = Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae", "2vxsx-fae");
+                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae", "2vxsx-fae");
                         let active2 = Converter.IsActive(context);
-                        let ok3 = Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae");
+                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae");
                         let active3 = Converter.IsActive(context);
-                        let ok4 = Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai");
+                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai");
                         let active4 = Converter.IsActive(context);
 
                         assertAllTrue([ 
@@ -634,11 +634,7 @@ module {
                             active1 == false, // Application should not be considered active with one out of four canister ids set
                             active2 == false, // Application should not be considered active with two out of four canister ids set
                             active3 == false, // Application should not be considered active with three out of four canister ids set
-                            active4 == true,  // Application should be considered active with four out of four canister ids set 
-                            ok1,
-                            ok2,
-                            ok3,
-                            ok4
+                            active4 == true  // Application should be considered active with four out of four canister ids set 
                         ]);
                     },
                 ),

@@ -309,6 +309,13 @@ type Settings = {
   cooldown_ns : Nat; 
 };
 
+type Mocks = {
+    old_token_mock : TokenInterface;
+    old_indexer_mock : OldIndexerInterface;
+    new_token_mock : TokenInterface;
+    new_indexer_mock : NewIndexerInterface;
+};
+
 type ConverterInterface = actor {
     get_account(account: Account) : async IndexAccountResult;
     convert_account(account: Account) : async ConvertResult;
@@ -327,5 +334,5 @@ type NewIndexerInterface = actor {
 
 type TokenInterface = actor {
     icrc1_transfer(args : TransferArgs) : async TransferResult;
-    burn(args : BurnArgs) : async TransferResult;
+    burn(args : BurnArgs) : async TransferResult;    
 };

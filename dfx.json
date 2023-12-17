@@ -20,6 +20,22 @@
     "sneed_dapp_tests": {
       "main": "tests/tests.mo",
       "type": "motoko"
+    },
+    "sneed_dapp_old_token_mock": {
+      "main": "tests/mocks/TokenCanisterMock.mo",
+      "type": "motoko"
+    },
+    "sneed_dapp_new_token_mock": {
+      "main": "tests/mocks/TokenCanisterMock.mo",
+      "type": "motoko"
+    },
+    "sneed_dapp_old_indexer_mock": {
+      "main": "tests/mocks/OldIndexerCanisterMock.mo",
+      "type": "motoko"
+    },
+    "sneed_dapp_new_indexer_mock": {
+      "main": "tests/mocks/NewIndexerCanisterMock.mo",
+      "type": "motoko"
     }
   },
   "defaults": {

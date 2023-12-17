@@ -9,34 +9,26 @@ import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
 import Principal "mo:base/Principal";
+import Cycles "mo:base/ExperimentalCycles";
 
 import Converter "../../src/";
 import T "../../src/Types";
 
 import ActorSpec "ActorSpec";
 
+import TokenMock "../mocks/TokenCanisterMock";
+import OldIndexerMock "../mocks/OldIndexerCanisterMock";
+import NewIndexerMock "../mocks/NewIndexerCanisterMock";
+
 module {
+
+
 
     public func get_context() : T.ConverterContext {
 
-        let caller = Principal.fromText("2vxsx-fae");
-        let account : T.Account = { 
-            owner = Principal.fromText("cpi23-5qaaa-aaaag-qcs5a-cai");
-            subaccount = null;
-        };
-        let converter : T.Account = { 
-            owner = Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai");
-            subaccount = null;
-        };
+        let caller = Principal.fromText("2vxsx-fae"); // anon
+        get_caller_context(caller);
 
-        let state = Converter.init();
-
-        return {
-            caller = caller;
-            state = state;
-            account = account;
-            converter = converter;
-        };
     };
 
     public func get_caller_context(caller : Principal) : T.ConverterContext {
@@ -62,25 +54,26 @@ module {
 
     public func get_caller_active_context(caller : Principal) : T.ConverterContext {
 
-        let account : T.Account = { 
-            owner = Principal.fromText("cpi23-5qaaa-aaaag-qcs5a-cai");
-            subaccount = null;
-        };
-        let converter : T.Account = { 
-            owner = Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai");
-            subaccount = null;
-        };
+        let context = get_caller_context(caller);
+        Converter.set_canister_ids(
+            context, 
+            "czysu-eaaaa-aaaag-qcvdq-cai", 
+            "czysu-eaaaa-aaaag-qcvdq-cai", 
+            "czysu-eaaaa-aaaag-qcvdq-cai", 
+            "czysu-eaaaa-aaaag-qcvdq-cai");
 
-        let state = Converter.init();
+        return context;
+    };
 
-        let context = {
-            caller = caller;
-            state = state;
-            account = account;
-            converter = converter;
-        };
+    public func get_context_with_mocks(caller : Principal) : T.ConverterContext {
 
-        let waste = Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai");
+        let context = get_caller_context(caller);
+        Converter.set_canister_ids(
+            context, 
+            "cgpjn-omaaa-aaaaa-qaakq-cai", 
+            "cbopz-duaaa-aaaaa-qaaka-cai", 
+            "cuj6u-c4aaa-aaaaa-qaajq-cai", 
+            "ctiya-peaaa-aaaaa-qaaja-cai");
 
         return context;
     };
@@ -184,6 +177,31 @@ module {
                 approve = null;
                 timestamp = timestamp;
             }
+        };
+    };
+
+    public func print_indexed_account(indexed : T.IndexedAccount) : () {
+        Debug.print("new_total_balance_d8: " # Nat.toText(indexed.new_total_balance_d8));
+        Debug.print("old_refundable_balance_d12: " # Nat.toText(indexed.old_refundable_balance_d12));
+        Debug.print("old_balance_d12: " # Nat.toText(indexed.old_balance_d12));
+        Debug.print("new_total_balance_underflow_d8: " # Nat.toText(indexed.new_total_balance_underflow_d8));
+        Debug.print("old_refundable_balance_underflow_d12: " # Nat.toText(indexed.old_refundable_balance_underflow_d12));
+        Debug.print("old_balance_underflow_d12: " # Nat.toText(indexed.old_balance_underflow_d12));
+        Debug.print("new_sent_acct_to_dapp_d8: " # Nat.toText(indexed.new_sent_acct_to_dapp_d8));
+        Debug.print("new_sent_dapp_to_acct_d8: " # Nat.toText(indexed.new_sent_dapp_to_acct_d8));
+        Debug.print("old_sent_acct_to_dapp_d12: " # Nat.toText(indexed.old_sent_acct_to_dapp_d12));
+        Debug.print("old_sent_dapp_to_acct_d12: " # Nat.toText(indexed.old_sent_dapp_to_acct_d12));
+        Debug.print("is_seeder: " # Bool.toText(indexed.is_seeder));
+        Debug.print("is_burner: " # Bool.toText(indexed.is_burner));
+        Debug.print("old_latest_send_found: " # Bool.toText(indexed.old_latest_send_found));
+        switch (indexed.old_latest_send_txid) {
+            case (null) { Debug.print("old_latest_send_txid: null"); };
+            case (?old_latest_send_txid) { Debug.print("old_latest_send_txid: " # Nat.toText(old_latest_send_txid)); };
+        };
+        Debug.print("new_latest_send_found: " # Bool.toText(indexed.new_latest_send_found));
+        switch (indexed.new_latest_send_txid) {
+            case (null) { Debug.print("new_latest_send_txid: null"); };
+            case (?new_latest_send_txid) { Debug.print("new_latest_send_txid: " # Nat.toText(new_latest_send_txid)); };
         };
     };
 
