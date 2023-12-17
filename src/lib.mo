@@ -67,14 +67,6 @@ module {
 
   public func init() : T.ConverterState {
 
-    // Token and indexer canister ids of old and new token
-    //stable var new_token_id = "zfcdd-tqaaa-aaaaq-aaaga-cai"; // TODO (Currently SNS-1)
-    //stable var new_indexer_id = "zlaol-iaaaa-aaaaq-aaaha-cai"; // TODO (Currently SNS-1)
-    let new_token_id = "aaaaa-aa"; 
-    let new_indexer_id = "aaaaa-aa"; 
-    let old_token_id = "r7cp6-6aaaa-aaaag-qco5q-cai";
-    let old_indexer_id = "xavfs-zyaaa-aaaak-afc2q-cai"; 
-
     // Keep track of the transaction index of the most recent send of the new token the dApp has made to each account. 
     // Before sending any converted tokens to an account, ensure this transaction index (if any) is found in the 
     // list of transactions fetched for the account at the beginning of the conversion.     
@@ -127,24 +119,19 @@ module {
     /// ACTORS ///
 
     // Old token canister
-    let old_token_canister : T.TokenInterface  = actor (old_token_id);
+    let old_token_canister : T.TokenInterface  = actor ("2vxsx-fae");
 
     // Old token indexer canister
-    let old_indexer_canister : T.OldIndexerInterface = actor (old_indexer_id);
+    let old_indexer_canister : T.OldIndexerInterface = actor ("2vxsx-fae");
 
     // New token canister
-    var new_token_canister : T.TokenInterface  = actor (new_token_id);
+    var new_token_canister : T.TokenInterface  = actor ("2vxsx-fae");
 
     // New token indexer canister
-    var new_indexer_canister : T.NewIndexerInterface = actor (new_indexer_id); 
+    var new_indexer_canister : T.NewIndexerInterface = actor ("2vxsx-fae"); 
 
     {
         persistent = {
-
-            var new_token_id = new_token_id; 
-            var new_indexer_id = new_indexer_id; 
-            var old_token_id = old_token_id;
-            var old_indexer_id = old_indexer_id; 
         
             var stable_new_latest_sent_txids = stable_new_latest_sent_txids;
             var stable_old_latest_sent_txids = stable_old_latest_sent_txids;
@@ -189,7 +176,7 @@ module {
   public func get_account(context : T.ConverterContext) : async* T.IndexAccountResult {
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
-    if (IsInactive(context)) { return #Err( { message = "Converter application has not yet been activated."; } ); };
+    if (not IsActive(context)) { return #Err( { message = "Converter application has not yet been activated."; } ); };
 
     // Ensure account is valid
     if (not ValidateAccount(context.account)) { return #Err( { message = "Invalid account."; } ); };
@@ -211,7 +198,7 @@ module {
   public func convert_account(context : T.ConverterContext) : async* T.ConvertResult {
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
-    if (IsInactive(context)) { return #Err(#NotActive); };
+    if (not IsActive(context)) { return #Err(#NotActive); };
 
     // Ensure account is valid
     if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
@@ -243,7 +230,7 @@ module {
   public func refund_account(context : T.ConverterContext) : async* T.RefundOldTokensResult {
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
-    if (IsInactive(context)) { return #Err(#NotActive); };
+    if (not IsActive(context)) { return #Err(#NotActive); };
 
     // Ensure account is valid
     if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
@@ -273,7 +260,7 @@ module {
   public func burn_old_tokens(context : T.ConverterContext, amount : T.Balance) : async* T.BurnOldTokensResult {
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
-    if (IsInactive(context)) { return #Err(#NotActive); };
+    if (not IsActive(context)) { return #Err(#NotActive); };
     
     // Ensure only controllers can call this function
     assert Principal.isController(context.caller);
@@ -318,10 +305,10 @@ module {
     let state = context.state;
 
     return {
-      new_token_canister_id = Principal.fromText(state.persistent.new_token_id);
-      new_indexer_canister_id = Principal.fromText(state.persistent.new_indexer_id);
-      old_token_canister_id = Principal.fromText(state.persistent.old_token_id);
-      old_indexer_canister_id = Principal.fromText(state.persistent.old_indexer_id);
+      new_token_canister_id = Principal.fromActor(state.persistent.new_token_canister);
+      new_indexer_canister_id = Principal.fromActor(state.persistent.new_indexer_canister);
+      old_token_canister_id = Principal.fromActor(state.persistent.old_token_canister);
+      old_indexer_canister_id = Principal.fromActor(state.persistent.old_indexer_canister);
     };
   };
 
@@ -339,11 +326,6 @@ module {
 
     // Extract state from context
     let state = context.state;
-
-    state.persistent.old_token_id := old_token_canister_id;
-    state.persistent.old_indexer_id := old_indexer_canister_id;
-    state.persistent.new_token_id := new_token_canister_id;
-    state.persistent.new_indexer_id := new_indexer_canister_id;
 
     state.persistent.old_token_canister := actor (old_token_canister_id);
     state.persistent.old_indexer_canister := actor (old_indexer_canister_id);
@@ -684,7 +666,7 @@ module {
         // Encourage the OLD token indexer to be up to date.
         // (It is not critical if it fails, worst case the user sees a lower dApp
         // balance than they would expect and will have to check back later).
-        let waste = await state.persistent.old_indexer_canister.synch_archive_full(state.persistent.old_token_id);
+        let waste = await state.persistent.old_indexer_canister.synch_archive_full(Principal.toText(Principal.fromActor(state.persistent.old_token_canister)));
 
         // Request the list of all transactions for the account from the OLD token indexer
         let old_transactions = await state.persistent.old_indexer_canister.get_account_transactions(Principal.toText(account.owner));
@@ -1030,9 +1012,11 @@ module {
   };
 
 
-  public func IsInactive(context : T.ConverterContext) : Bool {
-    context.state.persistent.old_token_id == "aaaaa-aa" or context.state.persistent.old_indexer_id == "aaaaa-aa" or
-    context.state.persistent.new_token_id == "aaaaa-aa" or context.state.persistent.new_indexer_id == "aaaaa-aa" 
+  public func IsActive(context : T.ConverterContext) : Bool {
+    Principal.isAnonymous(Principal.fromActor(context.state.persistent.old_token_canister)) == false and 
+      Principal.isAnonymous(Principal.fromActor(context.state.persistent.old_indexer_canister)) == false and
+      Principal.isAnonymous(Principal.fromActor(context.state.persistent.new_token_canister)) == false and 
+      Principal.isAnonymous(Principal.fromActor(context.state.persistent.new_indexer_canister)) == false 
   };
 
 };

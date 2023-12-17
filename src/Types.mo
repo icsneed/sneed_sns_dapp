@@ -35,11 +35,6 @@ type ConverterState = {
 
 type ConverterPersistentState = {
 
-    var new_token_id : Text; 
-    var new_indexer_id : Text; 
-    var old_token_id : Text;
-    var old_indexer_id : Text; 
-
     var stable_new_latest_sent_txids : [(Principal, TxIndex)];
     var stable_old_latest_sent_txids : [(Principal, TxIndex)];
 

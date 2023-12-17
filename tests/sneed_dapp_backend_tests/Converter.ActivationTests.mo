@@ -9,30 +9,11 @@ import Converter "../../src/";
 import T "../../src/Types";
 
 import ActorSpec "../utils/ActorSpec";
+import TestUtil "../utils/TestUtil";
 
 module {
 
-    public func get_context() : T.ConverterContext {
 
-        let caller = Principal.fromText("2vxsx-fae");
-        let account : T.Account = { 
-            owner = Principal.fromText("2vxsx-fae");
-            subaccount = null;
-        };
-        let converter : T.Account = { 
-            owner = Principal.fromText("2vxsx-fae");
-            subaccount = null;
-        };
-
-        let state = Converter.init();
-
-        return {
-            caller = caller;
-            state = state;
-            account = account;
-            converter = converter;
-        };
-    };
 
     public func test(controller : Principal) : async ActorSpec.Group {
 
@@ -54,10 +35,10 @@ module {
                     "Should not be able to call get_account before activation.",
                     do {
 
-                        let context = get_context();
+                        let context = TestUtil.get_context();
                         switch (await* Converter.get_account(context)) {
                             case (#Err(error)) { assertAllTrue([ error.message == "Converter application has not yet been activated." ]); };
-                            case (#Ok(account)) { Debug.trap("Should not have been able to use application before activation!"); };
+                            case (#Ok(account)) { Debug.trap("Should not have been able to call get_account before activation!"); };
                         };
 
                     },
@@ -66,10 +47,34 @@ module {
                     "Should not be able to call convert_account before activation.",
                     do {
 
-                        let context = get_context();
+                        let context = TestUtil.get_context();
                         switch (await* Converter.convert_account(context)) {
-                            case (#Err(#NotActive)) { assertAllTrue([ 1 == 1 ]); };
-                            case _ { Debug.trap("Should not have been able to use application before activation!"); };
+                            case (#Err(#NotActive)) { true };
+                            case _ { Debug.trap("Should not have been able to call convert_account before activation!"); };
+                        };
+
+                    },
+                ),
+                it(
+                    "Should not be able to call refund_account before activation.",
+                    do {
+
+                        let context = TestUtil.get_context();
+                        switch (await* Converter.refund_account(context)) {
+                            case (#Err(#NotActive)) { true };
+                            case _ { Debug.trap("Should not have been able to call refund_account before activation!"); };
+                        };
+
+                    },
+                ),
+                it(
+                    "Should not be able to call burn_old_tokens before activation.",
+                    do {
+
+                        let context = TestUtil.get_context();
+                        switch (await* Converter.burn_old_tokens(context, 1000000000000)) {
+                            case (#Err(#NotActive)) { true };
+                            case _ { Debug.trap("Should not have been able to call burn_old_tokens before activation!"); };
                         };
 
                     },
