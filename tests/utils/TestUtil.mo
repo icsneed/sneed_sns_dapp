@@ -203,6 +203,28 @@ module {
         context.state.ephemeral.new_latest_sent_txids.put(context.account.owner, index);
     };
 
+
+    public func verify_indexed_account_invariants(context : T.ConverterContext, indexed_account : T.IndexedAccount) : Bool {
+        let settings = context.state.persistent.settings;
+
+        if (indexed_account.old_sent_dapp_to_acct_d12 > indexed_account.old_sent_acct_to_dapp_d12) {
+            if (indexed_account.old_balance_d12 != 0) { return false; };
+            if (indexed_account.old_balance_underflow_d12 != indexed_account.old_sent_dapp_to_acct_d12 - indexed_account.old_sent_acct_to_dapp_d12) { return false; };
+        } else {
+            if (indexed_account.old_balance_d12 != indexed_account.old_sent_acct_to_dapp_d12 - indexed_account.old_sent_dapp_to_acct_d12) { return false; };
+            if (indexed_account.old_balance_underflow_d12 != 0) { return false; };
+        };
+
+        if (indexed_account.new_total_balance_d8 * settings.d12_to_d8 != indexed_account.old_balance_d12 
+                                                        + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
+                                                        - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8)) { return false; };
+
+        if (indexed_account.old_refundable_balance_d12 != indexed_account.old_balance_d12 - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8)) { return false; };
+
+        true;
+    };
+
+
     public func print_indexed_account(indexed : T.IndexedAccount) : () {
         Debug.print("new_total_balance_d8: " # Nat.toText(indexed.new_total_balance_d8));
         Debug.print("old_refundable_balance_d12: " # Nat.toText(indexed.old_refundable_balance_d12));
