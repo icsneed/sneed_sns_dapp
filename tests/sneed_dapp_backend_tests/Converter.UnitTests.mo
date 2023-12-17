@@ -543,6 +543,58 @@ module {
                     },
                 ),
                 it(
+                    "Controller should be able to set settings.",
+                    do {
+                        let context = TestUtil.get_caller_context(controller);
+                        let old_settings = Converter.get_settings(context);
+                        let new_settings : T.Settings = {
+                            allow_conversions = false;
+                            allow_refunds = true;
+                            allow_burns = false;
+                            allow_burner_refunds = true;
+                            allow_seeder_conversions  = false;
+                            allow_burner_conversions = true;
+                            new_fee_d8 = 12345678;
+                            old_fee_d12 = 987654321;
+                            d12_to_d8 = 9999;
+                            new_seeder_min_amount_d8 = 99999999999;
+                            old_burner_min_amount_d12 = 77777777777;
+                            cooldown_ns = 42;                                 
+                        };
+
+                        let ok = Converter.set_settings(context, new_settings);
+                        let new_settings_result = Converter.get_settings(context);
+
+                        assertAllTrue([ 
+                            old_settings.allow_conversions == true,
+                            old_settings.allow_refunds == true,
+                            old_settings.allow_burns == true,
+                            old_settings.allow_burner_refunds == false,
+                            old_settings.allow_seeder_conversions == false,
+                            old_settings.allow_burner_conversions == false,
+                            old_settings.new_fee_d8 == 1_000,
+                            old_settings.old_fee_d12 ==100_000_000,
+                            old_settings.d12_to_d8 == 10_000,
+                            old_settings.new_seeder_min_amount_d8 ==100_000_000_000,
+                            old_settings.old_burner_min_amount_d12 == 1000_000_000_000_000,
+                            old_settings.cooldown_ns == 3600000000000,
+
+                            new_settings.allow_conversions == new_settings_result.allow_conversions,
+                            new_settings.allow_refunds == new_settings_result.allow_refunds,
+                            new_settings.allow_burns == new_settings_result.allow_burns,
+                            new_settings.allow_burner_refunds == new_settings_result.allow_burner_refunds,
+                            new_settings.allow_seeder_conversions == new_settings_result.allow_seeder_conversions,
+                            new_settings.allow_burner_conversions == new_settings_result.allow_burner_conversions,
+                            new_settings.new_fee_d8 == new_settings_result.new_fee_d8,
+                            new_settings.old_fee_d12 == new_settings_result.old_fee_d12,
+                            new_settings.d12_to_d8 == new_settings_result.d12_to_d8,
+                            new_settings.new_seeder_min_amount_d8 == new_settings_result.new_seeder_min_amount_d8,
+                            new_settings.old_burner_min_amount_d12 == new_settings_result.old_burner_min_amount_d12,
+                            new_settings.cooldown_ns == new_settings_result.cooldown_ns
+                        ]);
+                    },
+                ),
+                it(
                     "Controller should be able to set canisters.",
                     do {
                         let context = TestUtil.get_caller_context(controller);
