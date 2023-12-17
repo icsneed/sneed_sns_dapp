@@ -23,7 +23,13 @@ module {
         "rkf6t-7iaaa-aaaag-qco6a-cai",
         "auzum-qe7jl-z2f6l-rwp3r-wkr4f-3rcz3-l7ejm-ltcku-c45fw-w7pi4-hqe",        
         "ehi5s-vxa47-cjckw-4dnt2-3kxk4-shngz-thwy2-5umya-2rij2-rllds-wqe",
-        "ltnvn-spenv-hileg-coyda-gclul-yqibf-pr3q6-vndkr-p5tdi-6ypip-cqe"
+        "ltnvn-spenv-hileg-coyda-gclul-yqibf-pr3q6-vndkr-p5tdi-6ypip-cqe",
+        "l2wou-xtapz-wfatn-ptq6w-v6yek-qshs5-qsy5a-tuixw-xbhq6-cimdp-xae",
+        "akbcy-jszkp-z6zfd-4md7k-xmdgr-p5stn-enzhm-47hpo-sxhps-aoyxt-bae",
+        "3scjg-z33zr-ll3bt-hdsov-kkitm-3tsml-tvgkt-d6jwa-onz35-hkfq5-zae",
+        "3xwpq-ziaaa-aaaah-qcn4a-cai",
+        "jw7or-laaaa-aaaag-qctca-cai",
+        "objst-kqaaa-aaaag-qcumq-cai"
     ];
 
     public func get_context() : T.ConverterContext {
@@ -134,12 +140,12 @@ module {
 
     public func get_old_dapp_to_acct_tx(context : T.ConverterContext, index : T.TxIndex, amount : T.Balance) 
         : T.OldTransaction { 
-        context.state.ephemeral.old_latest_sent_txids.put(context.account.owner, index);
         get_old_tx(index, amount, context.converter, context.account); 
     };
 
     public func get_old_tx(index : T.TxIndex, amount : T.Balance, from : T.Account, to : T.Account) : T.OldTransaction {
         let timestamp : T.Timestamp = Nat64.fromNat(Int.abs(Time.now()));
+
         return {
             kind = "TRANSFER";
             mint = null;
@@ -162,12 +168,12 @@ module {
 
     public func get_new_dapp_to_acct_tx(context : T.ConverterContext, index : T.TxIndex, amount : T.Balance) 
         : T.NewTransactionWithId {     
-        context.state.ephemeral.new_latest_sent_txids.put(context.account.owner, index);
         get_new_tx(index, amount, context.converter, context.account); 
     };
 
     public func get_new_tx(index : T.TxIndex, amount : T.Balance, from : T.Account, to : T.Account) : T.NewTransactionWithId {
         let timestamp : T.Timestamp = Nat64.fromNat(Int.abs(Time.now()));
+
         return {
             id = index;
             transaction = {
@@ -187,6 +193,14 @@ module {
                 timestamp = timestamp;
             }
         };
+    };
+
+    public func log_last_seen_old(context : T.ConverterContext, index : T.TxIndex) : () {
+        context.state.ephemeral.old_latest_sent_txids.put(context.account.owner, index);
+    };
+
+    public func log_last_seen_new(context : T.ConverterContext, index : T.TxIndex) : () {
+        context.state.ephemeral.new_latest_sent_txids.put(context.account.owner, index);
     };
 
     public func print_indexed_account(indexed : T.IndexedAccount) : () {

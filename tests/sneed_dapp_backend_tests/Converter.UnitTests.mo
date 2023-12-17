@@ -182,6 +182,7 @@ module {
                         let tx2 = TestUtil.get_old_acct_to_dapp_tx(context, 105, old_amount2_d12 + old_fee_d12);
                         let tx3 = TestUtil.get_old_dapp_to_acct_tx(context, 125, old_amount3_d12 + old_fee_d12);
                         let transactions : [T.OldTransaction] = [ tx, tx2, tx3 ];
+                        TestUtil.log_last_seen_old(context, 125);
 
                         let indexedOldAccount = Converter.IndexOldBalance(context, transactions);
                         assertAllTrue([ 
@@ -212,6 +213,7 @@ module {
                         let tx2 = TestUtil.get_new_acct_to_dapp_tx(context, 105, new_amount2_d8);
                         let tx3 = TestUtil.get_new_dapp_to_acct_tx(context, 125, new_amount3_d8);
                         let transactions : [T.NewTransactionWithId] = [ tx, tx2, tx3 ];
+                        TestUtil.log_last_seen_new(context, 125);
 
                         let indexedNewAccount = Converter.IndexNewBalance(context, transactions);
                         assertAllTrue([
@@ -243,6 +245,7 @@ module {
                         let tx2 = TestUtil.get_old_acct_to_dapp_tx(context, 105, old_amount2_d12 + old_fee_d12);
                         let tx3 = TestUtil.get_old_dapp_to_acct_tx(context, 125, old_amount3_d12 + old_fee_d12);
                         let transactions : [T.OldTransaction] = [ tx, tx2, tx3 ];
+                        TestUtil.log_last_seen_old(context, 125);
 
                         let indexedOldAccount = Converter.IndexOldBalance(context, transactions);                        
                         assertAllTrue([ 
@@ -271,6 +274,7 @@ module {
                         let tx2 = TestUtil.get_new_acct_to_dapp_tx(context, 105, new_amount2_d8);
                         let tx3 = TestUtil.get_new_dapp_to_acct_tx(context, 125, new_amount3_d8);
                         let transactions : [T.NewTransactionWithId] = [ tx, tx2, tx3 ];
+                        TestUtil.log_last_seen_new(context, 125);
 
                         let indexedNewAccount = Converter.IndexNewBalance(context, transactions);
                         assertAllTrue([
@@ -295,6 +299,7 @@ module {
                         //amount is inclusive of fee for old token
                         let tx = TestUtil.get_old_dapp_to_acct_tx(context, 100, old_amount_d12 + old_fee_d12);
                         let transactions : [T.OldTransaction] = [ tx ];
+                        TestUtil.log_last_seen_old(context, 100);
 
                         let indexedOldAccount = Converter.IndexOldBalance(context, transactions);
                         assertAllTrue([ 
@@ -319,6 +324,7 @@ module {
                         //amount is exclusive of fee for new token
                         let tx = TestUtil.get_new_dapp_to_acct_tx(context, 100, new_amount_d8);
                         let transactions : [T.NewTransactionWithId] = [ tx ];
+                        TestUtil.log_last_seen_new(context, 100);
 
                         let indexedNewAccount = Converter.IndexNewBalance(context, transactions);
                         assertAllTrue([
@@ -405,6 +411,7 @@ module {
                         let tx_ignore7 = TestUtil.get_old_tx(155, old_amount4_d12, TestUtil.get_converter_subaccount(), context.account);
 
                         let transactions : [T.OldTransaction] = [ tx_ignore, tx_ignore2, tx, tx_ignore3, tx2, tx_ignore4, tx_ignore5, tx3, tx_ignore6, tx_ignore7 ];
+                        TestUtil.log_last_seen_old(context, 125);
 
                         let indexedOldAccount = Converter.IndexOldBalance(context, transactions);
                         assertAllTrue([ 
@@ -447,6 +454,7 @@ module {
                         let tx_ignore7 = TestUtil.get_new_tx(155, old_amount4_d12, TestUtil.get_converter_subaccount(), context.account);
 
                         let transactions : [T.NewTransactionWithId] = [ tx_ignore, tx_ignore2, tx, tx_ignore3, tx2, tx_ignore4, tx_ignore5, tx3, tx_ignore6, tx_ignore7 ];
+                        TestUtil.log_last_seen_new(context, 125);
 
                         let indexedNewAccount = Converter.IndexNewBalance(context, transactions);
                         assertAllTrue([
@@ -478,6 +486,7 @@ module {
                         let tx2 = TestUtil.get_old_tx(105, old_amount2_d12 + old_fee_d12, TestUtil.get_test_zeroes_subaccount(), context.converter);
                         let tx3 = TestUtil.get_old_dapp_to_acct_tx(context, 125, old_amount3_d12 + old_fee_d12);
                         let transactions : [T.OldTransaction] = [ tx, tx2, tx3 ];
+                        TestUtil.log_last_seen_old(context, 125);
 
                         let indexedOldAccount = Converter.IndexOldBalance(context, transactions);
                         assertAllTrue([ 
@@ -508,6 +517,7 @@ module {
                         let tx2 = TestUtil.get_new_tx(105, new_amount2_d8, TestUtil.get_test_zeroes_subaccount(), context.converter);
                         let tx3 = TestUtil.get_new_dapp_to_acct_tx(context, 125, new_amount3_d8);
                         let transactions : [T.NewTransactionWithId] = [ tx, tx2, tx3 ];
+                        TestUtil.log_last_seen_new(context, 125);
 
                         let indexedNewAccount = Converter.IndexNewBalance(context, transactions);
                         assertAllTrue([

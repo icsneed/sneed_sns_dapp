@@ -1,5 +1,7 @@
 import T "../../src/Types";
 
+import TestUtil "../utils/TestUtil";
+
 shared actor class TokenMock() : async T.TokenInterface = {
 
     public func icrc1_transfer(args : T.TransferArgs) : async T.TransferResult {
