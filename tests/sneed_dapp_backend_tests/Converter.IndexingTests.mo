@@ -101,7 +101,7 @@ module {
                                     indexedAccount.new_latest_send_txid == null,
 
                                     indexedAccount.old_balance_d12 == amount1 - settings.old_fee_d12,
-                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d12_to_d8,
+                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d8_to_12,
                                     indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12
                                 ]);
 
@@ -144,7 +144,7 @@ module {
                                     indexedAccount.new_latest_send_txid == null,
 
                                     indexedAccount.old_balance_d12 == (amount1 + amount2) - (2 * settings.old_fee_d12),
-                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d12_to_d8,
+                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d8_to_12,
                                     indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12
                                 ]);
 
@@ -191,7 +191,7 @@ module {
                                     indexedAccount.new_latest_send_txid == null,
 
                                     indexedAccount.old_balance_d12 == (amount1 + amount2) - (2 * settings.old_fee_d12) - amount3,
-                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d12_to_d8,
+                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d8_to_12,
                                     indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12 - indexedAccount.old_sent_dapp_to_acct_d12,
                                     indexedAccount.old_sent_acct_to_dapp_d12 == amount1 + amount2 - (2 * settings.old_fee_d12),
                                     indexedAccount.old_sent_dapp_to_acct_d12 == amount3
@@ -239,11 +239,11 @@ module {
                                     indexedAccount.new_latest_send_found == true,
                                     indexedAccount.new_latest_send_txid == ?115,
 
-                                    indexedAccount.new_total_balance_d8 * settings.d12_to_d8 == indexedAccount.new_total_balance_d8 * settings.d12_to_d8,
-                                    indexedAccount.new_total_balance_d8 * settings.d12_to_d8 == (amount1 + amount2) 
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == indexedAccount.new_total_balance_d8 * settings.d8_to_12,
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == (amount1 + amount2) 
                                                                                     - (2 * settings.old_fee_d12) 
-                                                                                    - (amount3 * settings.d12_to_d8) 
-                                                                                    - (settings.new_fee_d8 * settings.d12_to_d8),
+                                                                                    - (amount3 * settings.d8_to_12) 
+                                                                                    - (settings.new_fee_d8 * settings.d8_to_12),
                                     indexedAccount.old_balance_d12 == (amount1 + amount2) - (2 * settings.old_fee_d12),
                                     indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12,
                                     indexedAccount.old_sent_acct_to_dapp_d12 == amount1 + amount2 - (2 * settings.old_fee_d12),
@@ -294,16 +294,16 @@ module {
                                     indexedAccount.new_latest_send_found == true,
                                     indexedAccount.new_latest_send_txid == ?115,
 
-                                    indexedAccount.new_total_balance_d8 * settings.d12_to_d8 == (amount1 + amount2) 
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == (amount1 + amount2) 
                                                                                     - (2 * settings.old_fee_d12) 
                                                                                     - amount3
-                                                                                    - (amount4 * settings.d12_to_d8) 
-                                                                                    - (settings.new_fee_d8 * settings.d12_to_d8),
-                                    indexedAccount.new_total_balance_d8 * settings.d12_to_d8 == indexedAccount.old_sent_acct_to_dapp_d12 
+                                                                                    - (amount4 * settings.d8_to_12) 
+                                                                                    - (settings.new_fee_d8 * settings.d8_to_12),
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == indexedAccount.old_sent_acct_to_dapp_d12 
                                                                                     - indexedAccount.old_sent_dapp_to_acct_d12
-                                                                                    - (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d12_to_d8),
-                                    indexedAccount.new_total_balance_d8 * settings.d12_to_d8 == indexedAccount.old_balance_d12 
-                                                                                    - (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d12_to_d8),
+                                                                                    - (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d8_to_12),
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == indexedAccount.old_balance_d12 
+                                                                                    - (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d8_to_12),
                                     indexedAccount.old_balance_d12 == (amount1 + amount2) - (2 * settings.old_fee_d12) - amount3,
                                     indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12 - indexedAccount.old_sent_dapp_to_acct_d12,
                                     indexedAccount.old_sent_acct_to_dapp_d12 == amount1 + amount2 - (2 * settings.old_fee_d12),
@@ -358,19 +358,19 @@ module {
                                     indexedAccount.new_latest_send_found == true,
                                     indexedAccount.new_latest_send_txid == ?125,
                                 
-                                    indexedAccount.new_total_balance_d8 * settings.d12_to_d8 == (amount1 + amount2) 
-                                                                                    + (amount5 * settings.d12_to_d8)
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == (amount1 + amount2) 
+                                                                                    + (amount5 * settings.d8_to_12)
                                                                                     - (2 * settings.old_fee_d12) 
                                                                                     - amount3
-                                                                                    - (amount4 * settings.d12_to_d8) 
-                                                                                    - (settings.new_fee_d8 * settings.d12_to_d8), 
-                                    indexedAccount.new_total_balance_d8 * settings.d12_to_d8 == indexedAccount.old_sent_acct_to_dapp_d12 
-                                                                                    + (indexedAccount.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
+                                                                                    - (amount4 * settings.d8_to_12) 
+                                                                                    - (settings.new_fee_d8 * settings.d8_to_12), 
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == indexedAccount.old_sent_acct_to_dapp_d12 
+                                                                                    + (indexedAccount.new_sent_acct_to_dapp_d8 * settings.d8_to_12)
                                                                                     - indexedAccount.old_sent_dapp_to_acct_d12
-                                                                                    - (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d12_to_d8),
-                                    indexedAccount.new_total_balance_d8 * settings.d12_to_d8 == indexedAccount.old_balance_d12 
-                                                                                    + (indexedAccount.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
-                                                                                    - (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d12_to_d8),
+                                                                                    - (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d8_to_12),
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == indexedAccount.old_balance_d12 
+                                                                                    + (indexedAccount.new_sent_acct_to_dapp_d8 * settings.d8_to_12)
+                                                                                    - (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d8_to_12),
 
                                     indexedAccount.old_balance_d12 == (amount1 + amount2) - (2 * settings.old_fee_d12) - amount3,
                                     indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12 - indexedAccount.old_sent_dapp_to_acct_d12,
@@ -543,8 +543,8 @@ module {
                                     indexedAccount.new_latest_send_found == true,
                                     indexedAccount.new_latest_send_txid == ?115,
 
-                                    indexedAccount.new_total_balance_underflow_d8 * settings.d12_to_d8 == 
-                                                                (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d12_to_d8) - indexedAccount.old_sent_acct_to_dapp_d12,
+                                    indexedAccount.new_total_balance_underflow_d8 * settings.d8_to_12 == 
+                                                                (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d8_to_12) - indexedAccount.old_sent_acct_to_dapp_d12,
                                     indexedAccount.old_sent_acct_to_dapp_d12 == amount1 - settings.old_fee_d12,
                                     indexedAccount.new_sent_dapp_to_acct_d8 == amount2 + settings.new_fee_d8
                                 ]);
@@ -570,7 +570,7 @@ module {
                         switch (indexedAccountResult) {
                             case (#Err({ message })) { Debug.trap(message); };
                             case (#Ok(indexedAccount)) {
-                                TestUtil.print_indexed_account(indexedAccount);
+
                                 assertAllTrue([ 
                                     TestUtil.verify_indexed_account_invariants(context, indexedAccount),
                                     
@@ -668,7 +668,6 @@ module {
                             case (#Err({ message })) { Debug.trap(message); };
                             case (#Ok(indexedAccount)) {
 
-                                TestUtil.print_indexed_account(indexedAccount);
                                 assertAllTrue([ 
                                     TestUtil.verify_indexed_account_invariants(context, indexedAccount),
                                     
@@ -687,10 +686,10 @@ module {
                                     indexedAccount.new_latest_send_found == true,
                                     indexedAccount.new_latest_send_txid == ?115,
 
-                                    indexedAccount.new_total_balance_underflow_d8 * settings.d12_to_d8 == 
-                                                                (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d12_to_d8) - indexedAccount.old_sent_acct_to_dapp_d12,
-                                    indexedAccount.new_total_balance_underflow_d8 * settings.d12_to_d8 == 
-                                                                (settings.new_fee_d8 * settings.d12_to_d8) + settings.old_fee_d12,
+                                    indexedAccount.new_total_balance_underflow_d8 * settings.d8_to_12 == 
+                                                                (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d8_to_12) - indexedAccount.old_sent_acct_to_dapp_d12,
+                                    indexedAccount.new_total_balance_underflow_d8 * settings.d8_to_12 == 
+                                                                (settings.new_fee_d8 * settings.d8_to_12) + settings.old_fee_d12,
                                     indexedAccount.old_sent_acct_to_dapp_d12 == amount1 - settings.old_fee_d12,
                                     indexedAccount.new_sent_dapp_to_acct_d8 == amount2 + settings.new_fee_d8
                                 ]);

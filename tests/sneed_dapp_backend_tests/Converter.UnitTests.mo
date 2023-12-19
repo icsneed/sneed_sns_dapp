@@ -562,7 +562,7 @@ module {
                             allow_burns = false;
                             new_fee_d8 = 12345678;
                             old_fee_d12 = 987654321;
-                            d12_to_d8 = 9999;
+                            d8_to_12 = 9999;
                             new_seeder_min_amount_d8 = 99999999999;
                             old_burner_min_amount_d12 = 77777777777;
                             cooldown_ns = 42;                                 
@@ -576,7 +576,7 @@ module {
                             old_settings.allow_burns == true,
                             old_settings.new_fee_d8 == 1_000,
                             old_settings.old_fee_d12 ==100_000_000,
-                            old_settings.d12_to_d8 == 10_000,
+                            old_settings.d8_to_12 == 10_000,
                             old_settings.new_seeder_min_amount_d8 ==100_000_000_000,
                             old_settings.old_burner_min_amount_d12 == 1000_000_000_000_000,
                             old_settings.cooldown_ns == 3600000000000,
@@ -584,7 +584,7 @@ module {
                             new_settings.allow_conversions == new_settings_result.allow_conversions,
                             new_settings.new_fee_d8 == new_settings_result.new_fee_d8,
                             new_settings.old_fee_d12 == new_settings_result.old_fee_d12,
-                            new_settings.d12_to_d8 == new_settings_result.d12_to_d8,
+                            new_settings.d8_to_12 == new_settings_result.d8_to_12,
                             new_settings.new_seeder_min_amount_d8 == new_settings_result.new_seeder_min_amount_d8,
                             new_settings.old_burner_min_amount_d12 == new_settings_result.old_burner_min_amount_d12,
                             new_settings.cooldown_ns == new_settings_result.cooldown_ns

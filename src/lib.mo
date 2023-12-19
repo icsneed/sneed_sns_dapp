@@ -84,7 +84,7 @@ module {
     let new_fee_d8 = 1_000;
     let old_fee_d12 = 100_000_000;
 
-    let d12_to_d8 : Int = 10_000; // 12 to 8 decimals
+    let d8_to_12 : Int = 10_000; // 12 to 8 decimals
 
     // An account sending this amount or more of the NEW token to the dApp is considered a "Seeder".
     // Seeders cannot use the "convert" function to return their funds if "allow_seeder_conversions" is false. 
@@ -143,7 +143,7 @@ module {
 
                 new_fee_d8 = new_fee_d8;
                 old_fee_d12 = old_fee_d12;
-                d12_to_d8 = d12_to_d8;
+                d8_to_12 = d8_to_12;
 
                 new_seeder_min_amount_d8 = new_seeder_min_amount_d8;
                 old_burner_min_amount_d12 = old_burner_min_amount_d12;
@@ -523,7 +523,7 @@ module {
         let old_balance_d12 = old_balance_result.old_balance_d12;
 
         // Convert the OLD token balance from d12 to d8. 
-        let old_balance_d8 : T.Balance = Int.abs(old_balance_d12 / settings.d12_to_d8);
+        let old_balance_d8 : T.Balance = Int.abs(old_balance_d12 / settings.d8_to_12);
 
         // Perform sub-indexing of the NEW token transactions for the account. 
         // Pick out the transactions that are between the dApp and the account.
@@ -549,7 +549,7 @@ module {
           new_total_balance_d8 := 0;
         };
 
-        let new_sent_dapp_to_acct_d12 : T.Balance = Int.abs(new_sent_dapp_to_acct_d8 * settings.d12_to_d8);
+        let new_sent_dapp_to_acct_d12 : T.Balance = Int.abs(new_sent_dapp_to_acct_d8 * settings.d8_to_12);
         
         // Return the results of the account indexing operation:
         return #Ok({

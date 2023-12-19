@@ -94,10 +94,10 @@ module {
 
         Converter.set_canister_ids(
             context, 
-            "cgpjn-omaaa-aaaaa-qaakq-cai", 
-            "cbopz-duaaa-aaaaa-qaaka-cai", 
-            "cuj6u-c4aaa-aaaaa-qaajq-cai", 
-            "ctiya-peaaa-aaaaa-qaaja-cai");
+            "b77ix-eeaaa-aaaaa-qaada-cai", 
+            "bw4dl-smaaa-aaaaa-qaacq-cai", 
+            "br5f7-7uaaa-aaaaa-qaaca-cai", 
+            "be2us-64aaa-aaaaa-qaabq-cai");
 
     };
 
@@ -230,16 +230,16 @@ module {
             if (indexed_account.old_balance_underflow_d12 != 0) { return false; };
         };
 
-        if (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8 > indexed_account.old_balance_d12 
-                                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)) {
-            if (indexed_account.new_total_balance_underflow_d8 * settings.d12_to_d8 != indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8
-                                                            - (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
+        if (indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_12 > indexed_account.old_balance_d12 
+                                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_12)) {
+            if (indexed_account.new_total_balance_underflow_d8 * settings.d8_to_12 != indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_12
+                                                            - (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_12)
                                                             - (indexed_account.old_balance_d12)) { return false; };
             if (indexed_account.new_total_balance_d8 != 0) { return false; };
         } else {
-            if (indexed_account.new_total_balance_d8 * settings.d12_to_d8 != indexed_account.old_balance_d12 
-                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
-                                                            - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8)) { return false; };
+            if (indexed_account.new_total_balance_d8 * settings.d8_to_12 != indexed_account.old_balance_d12 
+                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_12)
+                                                            - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_12)) { return false; };
             if (indexed_account.new_total_balance_underflow_d8 != 0) { return false; };
         };
 
