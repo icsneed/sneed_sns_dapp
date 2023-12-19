@@ -79,7 +79,6 @@ module {
     // dApp settings
     let allow_conversions = true;
     let allow_burns = true;
-    let allow_seeder_conversions = false;
 
     // Transaction fees of new and old token
     let new_fee_d8 = 1_000;
@@ -92,6 +91,14 @@ module {
     // This is expected to be the SNS Treasury, providing the NEW SNEED tokens for conversion.
     //stable var new_seeder_min_amount_d8 : T.Balance = 10_000;          - DEV! NEVER USE IN PRODUCTION!
     let new_seeder_min_amount_d8 : T.Balance = 100_000_000_000; // 1000 NEW tokens
+
+    // An account sending this amount or more of the OLD token to the dApp is considered a "Burner".
+    // Burners cannot use the "convert" function to convert their funds if "allow_burner_conversions" is false. 
+    // Burners cannot use the "refund" function to reclaim their funds if "allow_burner_refunds" is false. 
+    // This is expected to be the Sneed Team, providing the OLD SNEED tokens for burning.
+    //stable var old_burner_min_amount_d12 : T.Balance = 100;              - DEV! NEVER USE IN PRODUCTION!
+    //stable var old_burner_min_amount_d12 : T.Balance = 1_000_000_000;   // - TEST! NEVER USE IN PRODUCTION!  // 0.01 OLD tokens
+    let old_burner_min_amount_d12 : T.Balance = 1000_000_000_000_000;  // 1000 OLD tokens
 
     //stable var cooldown_ns : Nat = 60000000000; // "1 minute ns"         - DEV! NEVER USE IN PRODUCTION!
     //stable var cooldown_ns : Nat = 300000000000; // "5 minute ns"      - TEST! NEVER USE IN PRODUCTION!
@@ -133,13 +140,13 @@ module {
 
                 allow_conversions = allow_conversions;
                 allow_burns = allow_burns;
-                allow_seeder_conversions = allow_seeder_conversions;
 
                 new_fee_d8 = new_fee_d8;
                 old_fee_d12 = old_fee_d12;
                 d12_to_d8 = d12_to_d8;
 
                 new_seeder_min_amount_d8 = new_seeder_min_amount_d8;
+                old_burner_min_amount_d12 = old_burner_min_amount_d12;
                 cooldown_ns = cooldown_ns; 
 
             };
@@ -362,8 +369,13 @@ module {
 
         // Check that the account is not considered a "Seeder". 
         // A Seeder is an account that sent large sums of NEW token to the dApp.
-        // Seeders are not allowed to convert/return their NEW token balances when allow_seeder_conversions is false.
-        if (indexed_account.is_seeder == true and settings.allow_seeder_conversions == false) { return #Err(#IsSeeder); };
+        // Seeders are not allowed to convert/return their NEW token balances.
+        if (indexed_account.is_seeder == true) { return #Err(#IsSeeder); };
+
+        // Check that the account is not considered a "Burner". 
+        // A Burner is an account that sent large sums of OLD token to the dApp.
+        // Burners are not allowed to convert their OLD token balances.
+        if (indexed_account.is_burner == true) { return #Err(#IsBurner); };
 
         // Check that there is a positive dApp balance for the account.
         if (indexed_account.new_total_balance_d8 <= 0) { return #Err(#InsufficientFunds { balance = 0; }); };
@@ -553,6 +565,7 @@ module {
           old_sent_dapp_to_acct_d12 = old_balance_result.old_sent_dapp_to_acct_d12;
           
           is_seeder = new_balance_result.is_seeder;
+          is_burner = old_balance_result.is_burner;
           old_latest_send_found = old_balance_result.old_latest_send_found;
           old_latest_send_txid = old_balance_result.old_latest_send_txid;
           new_latest_send_found = new_balance_result.new_latest_send_found;
@@ -640,12 +653,18 @@ module {
       old_balance_underflow_d12 := old_sent_dapp_to_acct_d12 - old_sent_acct_to_dapp_d12;
     };
 
+    // Check if the sum of OLD tokens sent from the account to the dApp qualifies the 
+    // account as being considered a "Burner" account. 
+    // If so, it may not allowed to convert or refund its OLD tokens. 
+    let is_burner = old_sent_acct_to_dapp_d12 >= settings.old_burner_min_amount_d12; 
+
     // Return the result of the indexing operation.
     return {
       old_balance_d12 = old_balance_d12;
       old_balance_underflow_d12 = old_balance_underflow_d12;
       old_sent_acct_to_dapp_d12 = old_sent_acct_to_dapp_d12;
       old_sent_dapp_to_acct_d12 = old_sent_dapp_to_acct_d12;
+      is_burner = is_burner;
       old_latest_send_found = old_latest_send_found;
       old_latest_send_txid = old_latest_send_txid;
     };

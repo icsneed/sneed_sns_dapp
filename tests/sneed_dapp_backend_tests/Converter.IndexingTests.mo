@@ -56,6 +56,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 0,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 0,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == false,
                                     indexedAccount.old_latest_send_txid == null,
                                     indexedAccount.new_latest_send_found == false,
@@ -93,6 +94,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 999900000000,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 0,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == false,
                                     indexedAccount.old_latest_send_txid == null,
                                     indexedAccount.new_latest_send_found == false,
@@ -135,6 +137,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 2999800000000,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 0,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == false,
                                     indexedAccount.old_latest_send_txid == null,
                                     indexedAccount.new_latest_send_found == false,
@@ -181,6 +184,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 2999800000000,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 500000000000,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == true,
                                     indexedAccount.old_latest_send_txid == ?110,
                                     indexedAccount.new_latest_send_found == false,
@@ -229,6 +233,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 2999800000000,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 0,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == false,
                                     indexedAccount.old_latest_send_txid == null,
                                     indexedAccount.new_latest_send_found == true,
@@ -283,6 +288,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 2999800000000,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 500000000000,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == true,
                                     indexedAccount.old_latest_send_txid == ?110,
                                     indexedAccount.new_latest_send_found == true,
@@ -346,6 +352,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 2999800000000,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 500000000000,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == true,
                                     indexedAccount.old_latest_send_txid == ?110,
                                     indexedAccount.new_latest_send_found == true,
@@ -401,6 +408,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 1234467891234,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 0,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == false,
                                     indexedAccount.old_latest_send_txid == null,
                                     indexedAccount.new_latest_send_found == false,
@@ -440,6 +448,7 @@ module {
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 999900000000,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 2000000000000,
                                     indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
                                     indexedAccount.old_latest_send_found == true,
                                     indexedAccount.old_latest_send_txid == ?195,
                                     indexedAccount.new_latest_send_found == false,
@@ -455,7 +464,7 @@ module {
                     },
                 ),
                 it(
-                    "Indexing account with one new a2d transaction and one bigger new d2a transaction should yield a zero balance and an underflow.",
+                    "Indexing account with one new a2d transaction and one bigger new d2a transaction (and no old a2d transaction) should yield a zero balance and an underflow.",
                     do {
 
                         // new: (115, 200000000, dapp, acct), (185, 100000000, acct, dapp) 
@@ -463,7 +472,7 @@ module {
                         let settings = context.state.persistent.settings;
                         let amount1 = 200000000; // 2 old tokens
                         let amount2 = 100000000; // 1 old token
-                        TestUtil.log_last_seen_old(context, 115);
+                        TestUtil.log_last_seen_new(context, 115);
 
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
@@ -476,17 +485,18 @@ module {
                                     
                                     indexedAccount.new_total_balance_d8 == 0,
                                     indexedAccount.old_balance_d12 == 0,
-                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.new_total_balance_underflow_d8 == 100001000,
                                     indexedAccount.old_balance_underflow_d12 == 0,
-                                    indexedAccount.new_sent_acct_to_dapp_d8 == 0,
-                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 100000000,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 200001000,
                                     indexedAccount.old_sent_acct_to_dapp_d12 == 0,
                                     indexedAccount.old_sent_dapp_to_acct_d12 == 0,
                                     indexedAccount.is_seeder == false,
-                                    indexedAccount.old_latest_send_found == true,
-                                    indexedAccount.old_latest_send_txid == ?115,
-                                    indexedAccount.new_latest_send_found == false,
-                                    indexedAccount.new_latest_send_txid == null,
+                                    indexedAccount.is_burner == false,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == true,
+                                    indexedAccount.new_latest_send_txid == ?115,
 
                                     indexedAccount.old_balance_underflow_d12 == indexedAccount.old_sent_dapp_to_acct_d12 - indexedAccount.old_sent_acct_to_dapp_d12,
                                     indexedAccount.new_sent_acct_to_dapp_d8 == amount1,

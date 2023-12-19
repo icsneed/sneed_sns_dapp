@@ -207,6 +207,7 @@ type ConvertError = TransferError or {
     #OnCooldown : { since : Int; remaining : Int; };
     #StaleIndexer : { txid: ?TxIndex };
     #IsSeeder;
+    #IsBurner;
     #NotActive;
     #ConversionsNotAllowed;
     #IndexUnderflow : { 
@@ -239,6 +240,7 @@ type IndexedAccount = {
     old_sent_acct_to_dapp_d12 : Balance;
     old_sent_dapp_to_acct_d12 : Balance;
     is_seeder : Bool;
+    is_burner : Bool;
     old_latest_send_found : Bool;
     old_latest_send_txid : ?TxIndex;
     new_latest_send_found : Bool;
@@ -250,6 +252,7 @@ type IndexOldBalanceResult = {
     old_balance_underflow_d12 : Balance;
     old_sent_acct_to_dapp_d12 : Balance;
     old_sent_dapp_to_acct_d12 : Balance;
+    is_burner : Bool;
     old_latest_send_found : Bool;
     old_latest_send_txid : ?TxIndex;
 };
@@ -282,11 +285,11 @@ type BurnOldTokensErr = ConvertError or {
 type Settings = {
   allow_conversions : Bool;
   allow_burns : Bool;
-  allow_seeder_conversions : Bool;
   new_fee_d8 : Balance;
   old_fee_d12 : Balance;
   d12_to_d8 : Int;
   new_seeder_min_amount_d8 : Balance;
+  old_burner_min_amount_d12 : Balance;
   cooldown_ns : Nat; 
 };
 

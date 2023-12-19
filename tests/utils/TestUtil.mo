@@ -248,6 +248,7 @@ module {
         Debug.print("old_sent_acct_to_dapp_d12: " # Nat.toText(indexed.old_sent_acct_to_dapp_d12));
         Debug.print("old_sent_dapp_to_acct_d12: " # Nat.toText(indexed.old_sent_dapp_to_acct_d12));
         Debug.print("is_seeder: " # Bool.toText(indexed.is_seeder));
+        Debug.print("is_burner: " # Bool.toText(indexed.is_burner));
         Debug.print("old_latest_send_found: " # Bool.toText(indexed.old_latest_send_found));
         switch (indexed.old_latest_send_txid) {
             case (null) { Debug.print("old_latest_send_txid: null"); };
@@ -265,6 +266,7 @@ module {
         Debug.print("old_balance_underflow_d12: " # Nat.toText(indexed.old_balance_underflow_d12));
         Debug.print("old_sent_acct_to_dapp_d12: " # Nat.toText(indexed.old_sent_acct_to_dapp_d12));
         Debug.print("old_sent_dapp_to_acct_d12: " # Nat.toText(indexed.old_sent_dapp_to_acct_d12));
+        Debug.print("is_burner: " # Bool.toText(indexed.is_burner));
         Debug.print("old_latest_send_found: " # Bool.toText(indexed.old_latest_send_found));
         switch (indexed.old_latest_send_txid) {
             case (null) { Debug.print("old_latest_send_txid: null"); };
