@@ -29,7 +29,22 @@ module {
         "3scjg-z33zr-ll3bt-hdsov-kkitm-3tsml-tvgkt-d6jwa-onz35-hkfq5-zae",
         "3xwpq-ziaaa-aaaah-qcn4a-cai",
         "jw7or-laaaa-aaaag-qctca-cai",
-        "objst-kqaaa-aaaag-qcumq-cai"
+        "objst-kqaaa-aaaag-qcumq-cai",
+        "suaf3-hqaaa-aaaaf-bfyoa-cai",
+        "aboy3-giaaa-aaaar-aaaaq-cai",
+        "ciual-vyaaa-aaaan-qcywa-cai",
+        "k6dka-zyaaa-aaaaj-aafla-cai,", 
+        "2222s-4iaaa-aaaaf-ax2uq-cai", 
+        "2226x-viaaa-aaaaj-aab3q-cai", 
+        "2227b-baaaa-aaaao-abd6a-cai", 
+        "222ew-7aaaa-aaaar-akaia-cai", 
+        "222jd-4aaaa-aaaan-qc2oq-cai", 
+        "222l7-eqaaa-aaaar-aghea-cai", 
+        "222qi-2qaaa-aaaao-anesa-cai", 
+        "222r6-oyaaa-aaaaj-amgxq-cai", 
+        "222v3-hyaaa-aaaaf-a35yq-cai", 
+        "222yf-myaaa-aaaad-qfjiq-cai"
+
     ];
 
     public func get_context() : T.ConverterContext {
