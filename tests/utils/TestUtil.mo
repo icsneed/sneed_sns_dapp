@@ -33,17 +33,15 @@ module {
         "suaf3-hqaaa-aaaaf-bfyoa-cai",
         "aboy3-giaaa-aaaar-aaaaq-cai",
         "ciual-vyaaa-aaaan-qcywa-cai",
-        "k6dka-zyaaa-aaaaj-aafla-cai,", 
-        "2222s-4iaaa-aaaaf-ax2uq-cai", 
-        "2226x-viaaa-aaaaj-aab3q-cai", 
-        "2227b-baaaa-aaaao-abd6a-cai", 
-        "222ew-7aaaa-aaaar-akaia-cai", 
-        "222jd-4aaaa-aaaan-qc2oq-cai", 
-        "222l7-eqaaa-aaaar-aghea-cai", 
-        "222qi-2qaaa-aaaao-anesa-cai", 
-        "222r6-oyaaa-aaaaj-amgxq-cai", 
-        "222v3-hyaaa-aaaaf-a35yq-cai", 
-        "222yf-myaaa-aaaad-qfjiq-cai"
+        "k6dka-zyaaa-aaaaj-aafla-cai", 
+        "owdog-wiaaa-aaaad-qaaaq-cai",
+        "ujkeo-2rcd5-pew4p-pkvrt-gpxo3-gmr7j-rssd3-jgk44-aq6dg-snvsw-mqe", 
+        "eholc-klqlf-ru6kf-k5jv6-3gzhb-wxq53-tkyt4-flq3r-i7fuh-fzwwq-mqe", 
+        "fhzp2-mb4kr-hm4io-32js7-oketg-gdi73-4pqb4-6jyxp-ajbhd-tuiwt-bqe", 
+        "cb53b-qsf7f-isr4v-tco56-pu475-66ehq-cfkko-doax3-xrnjh-pdo57-zae", 
+        "3zjeh-xtbtx-mwebn-37a43-7nbck-qgquk-xtrny-42ujn-gzaxw-ncbzw-kqe", 
+        "o2ivq-5dsz3-nba5d-pwbk2-hdd3i-vybeq-qfz35-rqg27-lyesf-xghzc-3ae", 
+        "5oynr-yl472-mav57-c2oxo-g7woc-yytib-mp5bo-kzg3b-622pu-uatef-uqe"
 
     ];
 

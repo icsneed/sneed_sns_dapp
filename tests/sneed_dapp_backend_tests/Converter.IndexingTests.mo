@@ -3,6 +3,7 @@ import Error "mo:base/Error";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
+import Int "mo:base/Int";
 import Nat8 "mo:base/Nat8";
 import Principal "mo:base/Principal";
 
@@ -692,6 +693,313 @@ module {
                                                                 (settings.new_fee_d8 * settings.d8_to_12) + settings.old_fee_d12,
                                     indexedAccount.old_sent_acct_to_dapp_d12 == amount1 - settings.old_fee_d12,
                                     indexedAccount.new_sent_dapp_to_acct_d8 == amount2 + settings.new_fee_d8
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Indexing account with one huge old token Account-to-dApp transaction should mark the account as a burner.",
+                    do {
+
+                        // old: (100, 1001000000000000, acct, dapp)
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(14));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 1001000000000000; // 1001 old tokens
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+
+                                    indexedAccount.new_total_balance_d8 == 100099990000,
+                                    indexedAccount.old_balance_d12 == 1000999900000000,
+                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 0,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 1000999900000000,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
+                                    indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == true,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == false,
+                                    indexedAccount.new_latest_send_txid == null,
+
+                                    indexedAccount.old_balance_d12 == amount1 - settings.old_fee_d12,
+                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d8_to_12,
+                                    indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Indexing account with two old token Account-to-dApp transactions, together huge, should mark the account as a burner.",
+                    do {
+
+                        // old: (100, 2000000000000, acct, dapp), (105, 999000000000000, acct, dapp) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(15));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 2000000000000; // 2 old tokens
+                        let amount2 = 999000000000000; // 999 old tokens
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+                                    
+                                    indexedAccount.new_total_balance_d8 == 100099980000,
+                                    indexedAccount.old_balance_d12 == 1000999800000000,
+                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 0,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 1000999800000000,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
+                                    indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == true,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == false,
+                                    indexedAccount.new_latest_send_txid == null,
+
+                                    indexedAccount.old_balance_d12 == (amount1 + amount2) - (2 * settings.old_fee_d12),
+                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d8_to_12,
+                                    indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Old token dApp-to-account transactions do not negate burner status.",
+                    do {
+
+                        // old: (100, 1001000000000000, acct, dapp), (195, 999000000000000, dapp, acct) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(16));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 1001000000000000; // 1001 old tokens
+                        let amount2 = 999000000000000; // 999 old tokens
+                        TestUtil.log_last_seen_old(context, 195);
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+                                    
+                                    indexedAccount.new_total_balance_d8 == 199990000,
+                                    indexedAccount.old_balance_d12 == 1999900000000,
+                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 0,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 1000999900000000,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 999000000000000,
+                                    indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == true,
+                                    indexedAccount.old_latest_send_found == true,
+                                    indexedAccount.old_latest_send_txid == ?195,
+                                    indexedAccount.new_latest_send_found == false,
+                                    indexedAccount.new_latest_send_txid == null,
+
+                                    indexedAccount.old_balance_d12 == amount1 - amount2 - settings.old_fee_d12,
+                                    indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d8_to_12,
+                                    indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12 - indexedAccount.old_sent_dapp_to_acct_d12,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == amount1 - settings.old_fee_d12,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == amount2
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Indexing account with one huge new token Account-to-dApp transaction should mark the account as a seeder.",
+                    do {
+
+                        // new: (115, 100100000000, acct, dapp)
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(17));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 100100000000; // 1001 new tokens
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+
+                                    indexedAccount.new_total_balance_d8 == 100100000000,
+                                    indexedAccount.old_balance_d12 == 0,
+                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 ==100100000000,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 0,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
+                                    indexedAccount.is_seeder == true,
+                                    indexedAccount.is_burner == false,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == false,
+                                    indexedAccount.new_latest_send_txid == null,
+
+                                    indexedAccount.new_total_balance_d8 == amount1,
+                                    indexedAccount.new_total_balance_d8 == indexedAccount.new_sent_acct_to_dapp_d8,
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Indexing account with two new token Account-to-dApp transactions, together huge, should mark the account as a seeder.",
+                    do {
+
+                        // new: (115, 200000000, acct, dapp), (125, 99900000000, acct, dapp) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(18));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 200000000; // 2 new tokens
+                        let amount2 = 99900000000; // 999 new tokens
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+                                    
+                                    indexedAccount.new_total_balance_d8 == 100100000000,
+                                    indexedAccount.old_balance_d12 == 0,
+                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 100100000000,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 0,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
+                                    indexedAccount.is_seeder == true,
+                                    indexedAccount.is_burner == false,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == false,
+                                    indexedAccount.new_latest_send_txid == null,
+
+                                    indexedAccount.new_total_balance_d8 == amount1 + amount2,
+                                    indexedAccount.new_total_balance_d8 == indexedAccount.new_sent_acct_to_dapp_d8,
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "New token dApp-to-account transactions do not negate seeder status.",
+                    do {
+
+                        // new: (115, 100100000000, acct, dapp), (185, 99900000000, dapp, acct) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(19));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 100100000000; // 1001 new tokens
+                        let amount2 = 99900000000; // 999 new tokens
+                        TestUtil.log_last_seen_new(context, 195);
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+                                    
+                                    indexedAccount.new_total_balance_d8 == 199999000,
+                                    indexedAccount.old_balance_d12 == 0,
+                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 100100000000,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 99900001000,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 0,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
+                                    indexedAccount.is_seeder == true,
+                                    indexedAccount.is_burner == false,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == true,
+                                    indexedAccount.new_latest_send_txid == ?195,
+
+                                    indexedAccount.new_total_balance_d8 == amount1 - amount2 - settings.new_fee_d8,
+                                    indexedAccount.new_total_balance_d8 == indexedAccount.new_sent_acct_to_dapp_d8 - indexedAccount.new_sent_dapp_to_acct_d8,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == amount1,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == amount2 + settings.new_fee_d8
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Indexing account with one huge old a2d transaction and one huge new a2d transaction should mark the account as a burner and a seeder.",
+                    do {
+
+                        // old: (100, 1001000000000000, acct, dapp)
+                        // new: (115, 100100000000, acct, dapp)                        
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(20));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 1001000000000000; // 1001 old tokens
+                        let amount2 = 100100000000; // 1001 new tokens
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+
+                                    indexedAccount.new_total_balance_d8 == 200199990000,
+                                    indexedAccount.old_balance_d12 == 1000999900000000,
+                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 100100000000,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 1000999900000000,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
+                                    indexedAccount.is_seeder == true,
+                                    indexedAccount.is_burner == true,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == false,
+                                    indexedAccount.new_latest_send_txid == null,
+
+                                    indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12,
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == (indexedAccount.new_sent_acct_to_dapp_d8 * settings.d8_to_12) + 
+                                                                                                indexedAccount.old_sent_acct_to_dapp_d12,
+                                    indexedAccount.new_total_balance_d8 * settings.d8_to_12 == (amount2 * settings.d8_to_12) + 
+                                                                                                amount1 - settings.old_fee_d12,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == amount2,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == amount1 - settings.old_fee_d12
                                 ]);
 
                             };

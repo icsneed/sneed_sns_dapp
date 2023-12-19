@@ -86,6 +86,40 @@ shared actor class NewIndexerMock() : async T.NewIndexerInterface = {
             });            
         };
 
+        if (Converter.CompareAccounts(account, TestUtil.get_test_account(17))) {
+            return #Ok({
+                transactions = [TestUtil.get_new_tx(115, 100100000000, account, dapp)]; // 1001 new tokens
+                oldest_tx_id = ?115;
+            });            
+        };
+
+        if (Converter.CompareAccounts(account, TestUtil.get_test_account(18))) {
+            return #Ok({
+                transactions = [
+                    TestUtil.get_new_tx(115, 200000000, account, dapp), // 2 new tokens
+                    TestUtil.get_new_tx(185, 99900000000, account, dapp), // 999 new tokens
+                ]; 
+                oldest_tx_id = ?115;
+            });            
+        };
+
+        if (Converter.CompareAccounts(account, TestUtil.get_test_account(19))) {
+            return #Ok({
+                transactions = [
+                    TestUtil.get_new_tx(115, 100100000000, account, dapp), // 1001 new tokens
+                    TestUtil.get_new_tx(195, 99900000000, dapp, account), // 999 new tokens
+                ]; 
+                oldest_tx_id = ?115;
+            });            
+        };
+
+        if (Converter.CompareAccounts(account, TestUtil.get_test_account(20))) {
+            return #Ok({
+                transactions = [TestUtil.get_new_tx(115, 100100000000, account, dapp)]; // 1001 new tokens
+                oldest_tx_id = ?115;
+            });            
+        };
+
         #Ok({
             transactions = [];
             oldest_tx_id = null;

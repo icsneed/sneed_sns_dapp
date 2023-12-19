@@ -16,9 +16,9 @@ shared actor class OldIndexerMock() : async T.OldIndexerInterface = {
             subaccount = null;
         };
 
-        if (account == Principal.toText(TestUtil.get_test_account(0).owner)) {
-            return [];
-        };
+        //if (account == Principal.toText(TestUtil.get_test_account(0).owner)) {
+        //    return [];
+        //};
 
         if (account == Principal.toText(TestUtil.get_test_account(1).owner)) {
             return [ TestUtil.get_old_tx(100, 1000000000000, acct, dapp) ]; // 1 old token
@@ -96,6 +96,28 @@ shared actor class OldIndexerMock() : async T.OldIndexerInterface = {
             return [ 
                 TestUtil.get_old_tx(100, 1000000000000, acct, dapp) // 1 old token
             ];
+        };
+
+        if (account == Principal.toText(TestUtil.get_test_account(14).owner)) {
+            return [ TestUtil.get_old_tx(100, 1001000000000000, acct, dapp) ]; // 1001 old tokens
+        };
+
+        if (account == Principal.toText(TestUtil.get_test_account(15).owner)) {
+            return [ 
+                TestUtil.get_old_tx(100, 2000000000000, acct, dapp), // 2 old token
+                TestUtil.get_old_tx(105, 999000000000000, acct, dapp)  // 999 old tokens
+            ];
+        };
+
+        if (account == Principal.toText(TestUtil.get_test_account(16).owner)) {
+            return [ 
+                TestUtil.get_old_tx(100, 1001000000000000, acct, dapp), // 1001 old token
+                TestUtil.get_old_tx(195, 999000000000000, dapp, acct)  // 999 old tokens
+            ];
+        };
+
+        if (account == Principal.toText(TestUtil.get_test_account(20).owner)) {
+            return [ TestUtil.get_old_tx(100, 1001000000000000, acct, dapp) ]; // 1001 old tokens
         };
 
         [];
