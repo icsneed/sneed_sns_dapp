@@ -230,9 +230,18 @@ module {
             if (indexed_account.old_balance_underflow_d12 != 0) { return false; };
         };
 
-        if (indexed_account.new_total_balance_d8 * settings.d12_to_d8 != indexed_account.old_balance_d12 
-                                                        + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
-                                                        - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8)) { return false; };
+        if (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8 > indexed_account.old_balance_d12 
+                                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)) {
+            if (indexed_account.new_total_balance_underflow_d8 * settings.d12_to_d8 != indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8
+                                                            - (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
+                                                            - (indexed_account.old_balance_d12)) { return false; };
+            if (indexed_account.new_total_balance_d8 != 0) { return false; };
+        } else {
+            if (indexed_account.new_total_balance_d8 * settings.d12_to_d8 != indexed_account.old_balance_d12 
+                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
+                                                            - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8)) { return false; };
+            if (indexed_account.new_total_balance_underflow_d8 != 0) { return false; };
+        };
 
         true;
     };

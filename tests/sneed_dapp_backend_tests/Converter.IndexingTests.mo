@@ -470,8 +470,8 @@ module {
                         // new: (115, 200000000, dapp, acct), (185, 100000000, acct, dapp) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(9));
                         let settings = context.state.persistent.settings;
-                        let amount1 = 200000000; // 2 old tokens
-                        let amount2 = 100000000; // 1 old token
+                        let amount1 = 200000000; // 2 new tokens
+                        let amount2 = 100000000; // 1 new token
                         TestUtil.log_last_seen_new(context, 115);
 
                         let indexedAccountResult = await* Converter.IndexAccount(context);
@@ -479,7 +479,7 @@ module {
                         switch (indexedAccountResult) {
                             case (#Err({ message })) { Debug.trap(message); };
                             case (#Ok(indexedAccount)) {
-                                TestUtil.print_indexed_account(indexedAccount);
+
                                 assertAllTrue([ 
                                     TestUtil.verify_indexed_account_invariants(context, indexedAccount),
                                     
@@ -498,9 +498,201 @@ module {
                                     indexedAccount.new_latest_send_found == true,
                                     indexedAccount.new_latest_send_txid == ?115,
 
+                                    indexedAccount.new_total_balance_underflow_d8 == indexedAccount.new_sent_dapp_to_acct_d8 - indexedAccount.new_sent_acct_to_dapp_d8,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == amount2,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == amount1 + settings.new_fee_d8
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Indexing account with one old a2d transaction and one bigger new d2a transaction should yield zero balance and underflow.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp) 
+                        // new: (115, 200000000, dapp, acct) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(10));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 1000000000000; // 1 old token
+                        let amount2 = 200000000; // 2 new tokens
+                        TestUtil.log_last_seen_new(context, 115);
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+                                    
+                                    indexedAccount.new_total_balance_d8 == 0,
+                                    indexedAccount.old_balance_d12 == 999900000000,
+                                    indexedAccount.new_total_balance_underflow_d8 == 100011000,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 0,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 200001000,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 999900000000,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
+                                    indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == true,
+                                    indexedAccount.new_latest_send_txid == ?115,
+
+                                    indexedAccount.new_total_balance_underflow_d8 * settings.d12_to_d8 == 
+                                                                (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d12_to_d8) - indexedAccount.old_sent_acct_to_dapp_d12,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == amount1 - settings.old_fee_d12,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == amount2 + settings.new_fee_d8
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Indexing account with one new a2d transaction and one bigger old d2a transaction should yield zero balance and underflow.",
+                    do {
+
+                        // old: (195, 2000000000000, dapp, acct) 
+                        // new: (185, 100000000, acct, dapp) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(11));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 2000000000000; // 2 old tokens
+                        let amount2 = 100000000; // 1 new token
+                        TestUtil.log_last_seen_old(context, 195);
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+                                TestUtil.print_indexed_account(indexedAccount);
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+                                    
+                                    indexedAccount.new_total_balance_d8 == 100000000,
+                                    indexedAccount.old_balance_d12 == 0,
+                                    indexedAccount.new_total_balance_underflow_d8 == 0,
+                                    indexedAccount.old_balance_underflow_d12 == 2000000000000,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 100000000,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 0,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 2000000000000,
+                                    indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
+                                    indexedAccount.old_latest_send_found == true,
+                                    indexedAccount.old_latest_send_txid == ?195,
+                                    indexedAccount.new_latest_send_found == false,
+                                    indexedAccount.new_latest_send_txid == null,
+
+                                    indexedAccount.old_balance_underflow_d12 == indexedAccount.old_sent_dapp_to_acct_d12,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == amount1,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == amount2
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Indexing account with one old and one new a2d transaction, one bigger old d2a transaction and one bigger new d2a transaction should yield zero balances and underflows.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp), (195, 2000000000000, dapp, acct) 
+                        // new: (115, 200000000, dapp, acct), (185, 100000000, acct, dapp) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(12));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 1000000000000; // 1 old token
+                        let amount2 = 2000000000000; // 2 old tokens
+                        let amount3 = 200000000; // 2 new tokens
+                        let amount4 = 100000000; // 1 new token
+                        TestUtil.log_last_seen_old(context, 195);
+                        TestUtil.log_last_seen_new(context, 115);
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+                                    
+                                    indexedAccount.new_total_balance_d8 == 0,
+                                    indexedAccount.old_balance_d12 == 0,
+                                    indexedAccount.new_total_balance_underflow_d8 == 100001000,
+                                    indexedAccount.old_balance_underflow_d12 == 1000100000000,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 100000000,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 200001000,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 999900000000,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 2000000000000,
+                                    indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
+                                    indexedAccount.old_latest_send_found == true,
+                                    indexedAccount.old_latest_send_txid == ?195,
+                                    indexedAccount.new_latest_send_found == true,
+                                    indexedAccount.new_latest_send_txid == ?115,
+
                                     indexedAccount.old_balance_underflow_d12 == indexedAccount.old_sent_dapp_to_acct_d12 - indexedAccount.old_sent_acct_to_dapp_d12,
-                                    indexedAccount.new_sent_acct_to_dapp_d8 == amount1,
-                                    indexedAccount.old_sent_dapp_to_acct_d12 == amount2 + settings.new_fee_d8
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == amount1 - settings.old_fee_d12,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == amount2,
+
+                                    indexedAccount.new_total_balance_underflow_d8 == indexedAccount.new_sent_dapp_to_acct_d8 - indexedAccount.new_sent_acct_to_dapp_d8,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == amount4,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == amount3 + settings.new_fee_d8
+                                ]);
+
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Converting exact amount should cause underflow by old and new fee.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp) 
+                        // new: (115, 100000000, dapp, acct) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(13));
+                        let settings = context.state.persistent.settings;
+                        let amount1 = 1000000000000; // 1 old token
+                        let amount2 = 100000000; // 1 new token
+                        TestUtil.log_last_seen_new(context, 115);
+
+                        let indexedAccountResult = await* Converter.IndexAccount(context);
+
+                        switch (indexedAccountResult) {
+                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Ok(indexedAccount)) {
+
+                                TestUtil.print_indexed_account(indexedAccount);
+                                assertAllTrue([ 
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
+                                    
+                                    indexedAccount.new_total_balance_d8 == 0,
+                                    indexedAccount.old_balance_d12 == 999900000000,
+                                    indexedAccount.new_total_balance_underflow_d8 == 11000,
+                                    indexedAccount.old_balance_underflow_d12 == 0,
+                                    indexedAccount.new_sent_acct_to_dapp_d8 == 0,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == 100001000,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == 999900000000,
+                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
+                                    indexedAccount.is_seeder == false,
+                                    indexedAccount.is_burner == false,
+                                    indexedAccount.old_latest_send_found == false,
+                                    indexedAccount.old_latest_send_txid == null,
+                                    indexedAccount.new_latest_send_found == true,
+                                    indexedAccount.new_latest_send_txid == ?115,
+
+                                    indexedAccount.new_total_balance_underflow_d8 * settings.d12_to_d8 == 
+                                                                (indexedAccount.new_sent_dapp_to_acct_d8 * settings.d12_to_d8) - indexedAccount.old_sent_acct_to_dapp_d12,
+                                    indexedAccount.new_total_balance_underflow_d8 * settings.d12_to_d8 == 
+                                                                (settings.new_fee_d8 * settings.d12_to_d8) + settings.old_fee_d12,
+                                    indexedAccount.old_sent_acct_to_dapp_d12 == amount1 - settings.old_fee_d12,
+                                    indexedAccount.new_sent_dapp_to_acct_d8 == amount2 + settings.new_fee_d8
                                 ]);
 
                             };
