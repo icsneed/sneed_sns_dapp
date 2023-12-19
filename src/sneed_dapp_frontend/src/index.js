@@ -64,7 +64,6 @@ document.getElementById("convert").addEventListener("click", async (e) => {
   }
 
   button.setAttribute("disabled", true);
-  document.getElementById("refund").setAttribute("disabled", true);
 
   document.getElementById("result").innerHTML = "<img src='loading-gif.gif' width='48' height='48' />";
 
@@ -110,61 +109,6 @@ document.getElementById("convert").addEventListener("click", async (e) => {
 });
 
 
-document.getElementById("refund").addEventListener("click", async (e) => {
-  e.preventDefault();
-  const button = e.target;
-
-  const account = document.getElementById("account").value.toString();
-  const subaccount = getSubaccount(); 
-  if (subaccount && subaccount < 1) {
-    return false;
-  }
-
-  button.setAttribute("disabled", true);
-  document.getElementById("convert").setAttribute("disabled", true);
-
-  document.getElementById("result").innerHTML = "<img src='loading-gif.gif' width='48' height='48' />";
-
-  const result = await sneed_dapp_backend.refund_account(account, subaccount);
-
-  const ok = result["Ok"];
-  if (ok) {
-
-    const txid = ok;
-    const url = "https://sneed.one/?tx=" + txid;
-    const link = "<a href='" + url + "' target='_blank'>" + txid + "</a>"
-    document.getElementById("result").innerHTML = "Refunded in transaction: " + link;
-
-  } else {
-
-    const err = result["Err"];
-
-    if (err) {
-
-      if (err["OnCooldown"]) {
-
-        document.getElementById("result").innerHTML = "This function is on cooldown, please return in an hour.";
-
-      } else if (err["StaleIndexer"]) {
-
-        document.getElementById("result").innerHTML = "The transaction indexer is not up to date. Please try again in a while.";
-
-      } else {
-
-        document.getElementById("result").innerHTML = toJsonString(result);
-  
-      }
-
-    } else {
-
-      document.getElementById("result").innerHTML = toJsonString(result);
-
-    }
-  
-  }
-
-});
-
 document.querySelector("form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const button = e.target.querySelector("button");
@@ -178,7 +122,6 @@ document.querySelector("form").addEventListener("submit", async (e) => {
   button.setAttribute("disabled", true);
 
   document.getElementById("balance").innerHTML = "<img src='loading-gif.gif' width='48' height='48' />";
-  document.getElementById("refundable").innerHTML = "";
 
   const result = await sneed_dapp_backend.get_account(account, subaccount);
     
@@ -186,22 +129,12 @@ document.querySelector("form").addEventListener("submit", async (e) => {
   if (ok) {
 
     const balance_d8 = ok["new_total_balance_d8"];
-    const refundable_d12 = ok["old_refundable_balance_d12"];
     var balance = 0;
-    var refundable = 0;
 
     if (balance_d8 > 0) {
 
       balance = Number(balance_d8) / d8;
       document.getElementById("convert").removeAttribute("disabled");
-
-    }
-
-    if (refundable_d12 > 0) {
-
-      refundable = Number(refundable_d12) / d12;
-      document.getElementById("refundable").innerHTML = "Refundable: " + refundable + " SNEED";
-      document.getElementById("refund").removeAttribute("disabled");
 
     }
 

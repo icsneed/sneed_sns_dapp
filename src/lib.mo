@@ -28,7 +28,6 @@
 //  - increasing the balance for all NEW SNEED tokens sent from the account to the dApp
 //    (This is for the initial Seeding transactions, but also so that if anyone sends 
 //     NEW SNEED to the dApp by mistake they can reclaim it by calling the "convert" function).
-//  - decreasing the balance for all OLD SNEED tokens sent from the dApp to the account (refunds).
 //
 // LEGEND: 
 // Variables beginning with "new_" represent entities and token amounts for the NEW token.
@@ -79,11 +78,8 @@ module {
 
     // dApp settings
     let allow_conversions = true;
-    let allow_refunds = true;
     let allow_burns = true;
-    let allow_burner_refunds = false;
     let allow_seeder_conversions = false;
-    let allow_burner_conversions = false;
 
     // Transaction fees of new and old token
     let new_fee_d8 = 1_000;
@@ -97,23 +93,15 @@ module {
     //stable var new_seeder_min_amount_d8 : T.Balance = 10_000;          - DEV! NEVER USE IN PRODUCTION!
     let new_seeder_min_amount_d8 : T.Balance = 100_000_000_000; // 1000 NEW tokens
 
-    // An account sending this amount or more of the OLD token to the dApp is considered a "Burner".
-    // Burners cannot use the "convert" function to convert their funds if "allow_burner_conversions" is false. 
-    // Burners cannot use the "refund" function to reclaim their funds if "allow_burner_refunds" is false. 
-    // This is expected to be the Sneed Team, providing the OLD SNEED tokens for burning.
-    //stable var old_burner_min_amount_d12 : T.Balance = 100;              - DEV! NEVER USE IN PRODUCTION!
-    //stable var old_burner_min_amount_d12 : T.Balance = 1_000_000_000;   // - TEST! NEVER USE IN PRODUCTION!  // 0.01 OLD tokens
-    let old_burner_min_amount_d12 : T.Balance = 1000_000_000_000_000;  // 1000 OLD tokens
-
-
     //stable var cooldown_ns : Nat = 60000000000; // "1 minute ns"         - DEV! NEVER USE IN PRODUCTION!
     //stable var cooldown_ns : Nat = 300000000000; // "5 minute ns"      - TEST! NEVER USE IN PRODUCTION!
     //stable var cooldown_ns : Nat = 600000000000; // "10 minutes ns"    - OPTIMISTIC
     let cooldown_ns : Nat = 3600000000000; // "1 hour ns"       - PESSIMISTIC
 
-    // Keep track of when the "convert" or "refund" function was most recently called for each
+    // Keep track of when the "convert" function was most recently called for each
     // account, and enforce a cooldown preventing the functions being called too
-    // frequently for a given account. This also prevents reentrancy issues.
+    // frequently for a given account, giving indexers a chance to catch up. 
+    // This also prevents reentrancy issues.
     let cooldowns = Map.HashMap<Principal, Time.Time>(32, Principal.equal, Principal.hash);
 
     /// ACTORS ///
@@ -144,18 +132,14 @@ module {
             var settings = {
 
                 allow_conversions = allow_conversions;
-                allow_refunds = allow_refunds;
                 allow_burns = allow_burns;
-                allow_burner_refunds = allow_burner_refunds;
                 allow_seeder_conversions = allow_seeder_conversions;
-                allow_burner_conversions = allow_burner_conversions;
 
                 new_fee_d8 = new_fee_d8;
                 old_fee_d12 = old_fee_d12;
                 d12_to_d8 = d12_to_d8;
 
                 new_seeder_min_amount_d8 = new_seeder_min_amount_d8;
-                old_burner_min_amount_d12 = old_burner_min_amount_d12;
                 cooldown_ns = cooldown_ns; 
 
             };
@@ -193,7 +177,7 @@ module {
   // Any new tokens that have been sent from the account
   // to the dApp will also be refunded by a call to this method.
   // After tokens for an account have been converted,
-  // a cooldown prevents users from calling the "convert" (or "refund") function 
+  // a cooldown prevents users from calling the "convert" function 
   // for that same account again before the specified cooldown period has passed.
   public func convert_account(context : T.ConverterContext) : async* T.ConvertResult {
 
@@ -219,44 +203,10 @@ module {
     
   };
 
-  // Refund old tokens for an account. 
-  // This function sends the old tokens to the user account.
-  // The amount matches the number of old tokens the
-  // user account has sent to the dApp and that have not 
-  // yet been converted.
-  // After tokens for an account have been refunded,
-  // a cooldown prevents users from calling the "refund" (or "convert") function 
-  // for that same account again before the specified cooldown period has passed.
-  public func refund_account(context : T.ConverterContext) : async* T.RefundOldTokensResult {
-
-    // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
-    if (not IsActive(context)) { return #Err(#NotActive); };
-
-    // Ensure account is valid
-    if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
-
-    // Ensure the account is not on cooldown.
-    if (OnCooldown(context, context.account.owner)) {
-      return #Err(#OnCooldown { 
-        since = CooldownSince(context, context.account.owner); 
-        remaining = CooldownRemaining(context, context.account.owner); })
-    };
-
-    // The account was not on cooldown, so we start 
-    // the cooldown timer and proceed with the refund
-    context.state.ephemeral.cooldowns.put(context.account.owner, Time.now());
-
-    // Refund old tokens.
-    await* RefundOldTokens(context, null);
-    
-  };
-
   // Burns the specified amount of old tokens. 
-  // This method should only be called by the dApp controllers,
-  // And only with great care so no unconverted old tokens are burned,
-  // leaving users able to refund their old token balances! 
-  // NB: users would in still be able to convert their balances to NEW token,
-  //     even if the old tokens on the dApp have been burned.
+  // This method should only be called by the dApp controllers.
+  // NB: users will still be able to convert their balances to NEW token,
+  //     even when the OLD tokens on the dApp have been burned.
   public func burn_old_tokens(context : T.ConverterContext, amount : T.Balance) : async* T.BurnOldTokensResult {
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
@@ -272,8 +222,10 @@ module {
         remaining = CooldownRemaining(context, context.caller); })
     };
 
-    // The account was not on cooldown, so we start 
-    // the cooldown timer and proceed with the refund
+    // The caller (controller) was not on cooldown, so we start 
+    // the cooldown timer and proceed with the burn.
+    // This prevents an accidental double burn 
+    // (from accidentally doubly entered DAO propositions to burn.)
     context.state.ephemeral.cooldowns.put(context.caller, Time.now());
 
     //Burn old tokens
@@ -351,12 +303,14 @@ module {
   //    should retry after a while, giving the indexer a chance to catch up.
   //    A corresponding verification in the transactions to the OLD account 
   //    is also made to check for the most recent OLD token transaction 
-  //    from the dApp to the account (refunds).
+  //    from the dApp to the account (while refunds of OLD tokens are not supported, 
+  //    this check is still included as an extra safety measure).
   // 4) Derive the account's balance on the dApp (OLD tokens available to
   //    convert to NEW tokens) by adding up all the OLD token transactions
   //    from the account to the dApp and subtracting all the NEW token transactions 
   //    from the dApp to the account (conversions) as well as any OLD token transactions
-  //    from the dApp to the account (OLD token refunds).
+  //    from the dApp to the account (OLD token refunds are not supported by dApp 
+  //    but any such transactions should still be taken into account for safety).
   // 5) Send an amount of NEW tokens to the account, matching the balance
   //    derived in step 4.
   // 6) Save the transaction index of the sent NEW tokens for later verification
@@ -411,21 +365,14 @@ module {
         // Seeders are not allowed to convert/return their NEW token balances when allow_seeder_conversions is false.
         if (indexed_account.is_seeder == true and settings.allow_seeder_conversions == false) { return #Err(#IsSeeder); };
 
-        // Check that the account is not considered a "Burner". 
-        // A Burner is an account that sent large sums of OLD token to the dApp.
-        // Burners are not allowed to convert their OLD token balances when allow_burner_conversions is false.
-        if (indexed_account.is_burner == true and settings.allow_burner_conversions == false) { return #Err(#IsBurner); };
-
         // Check that there is a positive dApp balance for the account.
         if (indexed_account.new_total_balance_d8 <= 0) { return #Err(#InsufficientFunds { balance = 0; }); };
 
         // Verify that the indexer did not find any underflow issues.
         if (indexed_account.new_total_balance_underflow_d8 > 0
-          or indexed_account.old_refundable_balance_underflow_d12 > 0
           or indexed_account.old_balance_underflow_d12 > 0) { 
           return #Err(#IndexUnderflow { 
             new_total_balance_underflow_d8 = indexed_account.new_total_balance_underflow_d8; 
-            old_refundable_balance_underflow_d12 = indexed_account.old_refundable_balance_underflow_d12;
             old_balance_underflow_d12 = indexed_account.old_balance_underflow_d12;
             new_sent_acct_to_dapp_d8 = indexed_account.new_sent_acct_to_dapp_d8;
             new_sent_dapp_to_acct_d8 = indexed_account.new_sent_dapp_to_acct_d8;
@@ -479,121 +426,6 @@ module {
         // for verification during any possible subsequent calls to "convert" for the same account.  
         switch (transfer_result) {
           case (#Ok(txid)) { state.ephemeral.new_latest_sent_txids.put(account.owner, txid); };
-          case _ { /* do nothing*/ };
-        };
-
-        // Return the result of the transfer transaction.
-        transfer_result;
-
-      };
-    };
-  };
-
-  // Refund OLD tokens for a specified account.
-  public func RefundOldTokens(context : T.ConverterContext, amount_d12: ?T.Balance) : async* T.RefundOldTokensResult {
-
-    // Extract account from context
-    let account = context.account;
-
-    // Extract state from context
-    let state = context.state;
-
-    // Extract settings from state
-    let settings = state.persistent.settings;
-
-    // Ensure refunds are allowed.
-    if (settings.allow_refunds == false) { return #Err(#RefundsNotAllowed); };
-
-    // Index the account.
-    let indexedAccount = await* IndexAccount(context);
-
-    switch (indexedAccount) {
-      
-      // If indexing the account failed, return error    
-      case (#Err({message})) { 
-        return #Err(#GenericError {
-              error_code = 0;
-              message = message;
-          }); 
-      };
-      
-      // Indexing succeeded, proceed with conversion
-      case (#Ok(indexed_account)) { 
-        
-        // Verify that the last sent OLD token transaction from the dApp to the account, if any,
-        // was found in the list of transactions returned from the OLD token indexer.
-        // If not, the account's derived refundable balance on the dApp would be incorrect (it would seem too large).
-        // In such a scenario a #StaleIndexer error is returned, and the user has to wait and retry later, 
-        // giving the indexer a chance to catch up.  
-        if (indexed_account.old_latest_send_found == false and indexed_account.old_latest_send_txid != null) { 
-          return #Err(#StaleIndexer { txid = indexed_account.old_latest_send_txid; } ); 
-        };
-
-        // Also verify that the last sent NEW token transaction from the dApp to the account, if any,
-        // was found in the list of transactions returned from the NEW token indexer.
-        if (indexed_account.new_latest_send_found == false and indexed_account.new_latest_send_txid != null) { 
-          return #Err(#StaleIndexer { txid = indexed_account.new_latest_send_txid; } ); 
-        };
-
-        // Check that the account is not considered a "Burner". 
-        // A Burner is an account that sent large sums of OLD token to the dApp.
-        // Burners are not allowed to refund their OLD token balances when allow_burner_refunds is false.
-        if (indexed_account.is_burner == true and settings.allow_burner_refunds == false) { return #Err(#IsBurner); };
-
-        // Check that there is a positive dApp balance for the account.
-        if (indexed_account.old_refundable_balance_d12 <= 0) { return #Err(#InsufficientFunds { balance = 0; }); };
-
-        // Verify that the indexer did not find any underflow issues.
-        if (indexed_account.new_total_balance_underflow_d8 > 0
-          or indexed_account.old_refundable_balance_underflow_d12 > 0
-          or indexed_account.old_balance_underflow_d12 > 0) { 
-          return #Err(#IndexUnderflow { 
-            new_total_balance_underflow_d8 = indexed_account.new_total_balance_underflow_d8; 
-            old_refundable_balance_underflow_d12 = indexed_account.old_refundable_balance_underflow_d12;
-            old_balance_underflow_d12 = indexed_account.old_balance_underflow_d12;
-            new_sent_acct_to_dapp_d8 = indexed_account.new_sent_acct_to_dapp_d8;
-            new_sent_dapp_to_acct_d8 = indexed_account.new_sent_dapp_to_acct_d8;
-            old_sent_acct_to_dapp_d12 = indexed_account.old_sent_acct_to_dapp_d12;
-            old_sent_dapp_to_acct_d12 = indexed_account.old_sent_dapp_to_acct_d12;
-          }); 
-        };
-
-        // put refundable balance and amount in variables that can be sanitized.
-        var old_refundable_balance_checked_d12 : Nat = indexed_account.old_refundable_balance_d12;
-        var old_amount_checked_d12 : Nat = 0;
-
-        // if no amount was passed to the function's amount_d12 parameter,
-        // use the account's full refundable balance as amount. 
-        // OLD fee token amount is inclusive of fee.
-        switch (amount_d12) {
-          case (null) { old_amount_checked_d12 := old_refundable_balance_checked_d12; };
-          case (?amt) { old_amount_checked_d12 := amt; };
-        };
-
-        // Verify that the amount is valid: It must be greater than fee.
-        if (old_amount_checked_d12 <= settings.old_fee_d12) { return #Err(#GenericError { error_code = 0; message = "Amount must be greater than transaction fee."; }); }; 
-
-        // Verify that the balance is valid: It must be greater than or equal to the sum of the amount.
-        if (old_refundable_balance_checked_d12 < old_amount_checked_d12) { return #Err(#InsufficientFunds { balance = old_refundable_balance_checked_d12; }); };        
-
-        // Create the arguments for the transfer transaction request.                
-        let transfer_args : T.TransferArgs = {
-          from_subaccount = null;
-          to = account;
-          amount = old_amount_checked_d12;
-          fee = null;
-          memo = null;
-
-          created_at_time = null;
-        };
-
-        // transfer the OLD tokens to the account
-        let transfer_result = await state.persistent.old_token_canister.icrc1_transfer(transfer_args);
-
-        // If the transaction succeeded, save away the index of the transfer transaction 
-        // for verification during any possible subsequent calls to "refund" for the same account.  
-        switch (transfer_result) {
-          case (#Ok(txid)) { state.ephemeral.old_latest_sent_txids.put(account.owner, txid); };
           case _ { /* do nothing*/ };
         };
 
@@ -672,7 +504,8 @@ module {
         // Perform sub-indexing of the OLD token transactions for the account. 
         // Pick out the transactions that are between the dApp and the account.
         // Sum up the amount of OLD tokens sent from the account to the dApp
-        // Sum up the amount of OLD tokens sent from the dApp to the account (refunds)
+        // Sum up the amount of OLD tokens sent from the dApp to the account 
+        // (refunds not supported by dApp, but such transactions if they exist must be counted)
         let old_balance_result = IndexOldBalance(context, old_transactions);
 
         let old_balance_d12 = old_balance_result.old_balance_d12;
@@ -705,24 +538,13 @@ module {
         };
 
         let new_sent_dapp_to_acct_d12 : T.Balance = Int.abs(new_sent_dapp_to_acct_d8 * settings.d12_to_d8);
-
-        // The refundable OLD token balance is the OLD token balance minus any funds that have already been converted. 
-        var old_refundable_balance_d12 = 0;
-        var old_refundable_balance_underflow_d12 = 0;
-        if (old_balance_d12 >= new_sent_dapp_to_acct_d12) {
-          old_refundable_balance_d12 := old_balance_d12 - new_sent_dapp_to_acct_d12;
-        } else {
-          old_refundable_balance_underflow_d12 := new_sent_dapp_to_acct_d12 - old_balance_d12;
-        };
         
         // Return the results of the account indexing operation:
         return #Ok({
           new_total_balance_d8 = new_total_balance_d8;          
-          old_refundable_balance_d12 = old_refundable_balance_d12;
           old_balance_d12 = old_balance_d12;
 
           new_total_balance_underflow_d8 = new_total_balance_underflow_d8;          
-          old_refundable_balance_underflow_d12 = old_refundable_balance_underflow_d12;
           old_balance_underflow_d12 = old_balance_result.old_balance_underflow_d12;
           
           new_sent_acct_to_dapp_d8 = new_sent_acct_to_dapp_d8;
@@ -731,7 +553,6 @@ module {
           old_sent_dapp_to_acct_d12 = old_balance_result.old_sent_dapp_to_acct_d12;
           
           is_seeder = new_balance_result.is_seeder;
-          is_burner = old_balance_result.is_burner;
           old_latest_send_found = old_balance_result.old_latest_send_found;
           old_latest_send_txid = old_balance_result.old_latest_send_txid;
           new_latest_send_found = new_balance_result.new_latest_send_found;
@@ -756,11 +577,13 @@ module {
     // Track the sum of OLD tokens sent from the account to the dapp
     var old_sent_acct_to_dapp_d12 : T.Balance = 0;
 
-    // Track the sum of OLD tokens sent from the dApp to the account (refunds)
+    // Track the sum of OLD tokens sent from the dApp to the account 
+    // (refunds not supported by dApp but any such transactions should still be counted)
     var old_sent_dapp_to_acct_d12 : T.Balance = 0;
 
     // Get the index of the most recent OLD token transfer transaction from the dApp to the account 
-    // (if any, null if account has never refunded)
+    // (if any, null if account has never refunded - which is expected to be the case, since the 
+    // dApp does not support refunds of the OLD token.)
     var old_latest_send_txid : ?T.TxIndex = state.ephemeral.old_latest_sent_txids.get(account.owner);
     
     // Track if the most recent OLD token transfer transaction from the dApp to the account (if any)
@@ -806,13 +629,9 @@ module {
       };        
     };
     
-    // Check if the sum of OLD tokens sent from the account to the dApp qualifies the 
-    // account as being considered a "Burner" account. 
-    // If so, it may not allowed to convert or refund its OLD tokens. 
-    let is_burner = old_sent_acct_to_dapp_d12 >= settings.old_burner_min_amount_d12; 
-
     // Calculate the OLD token balance as the sum of OLD tokens sent from the account to the dApp,
-    // minus the sum of any OLD tokens sent from the dApp to the account (refunds).
+    // minus the sum of any OLD tokens sent from the dApp to the account (refunds are not supported
+    // by the dApp but must be counted if such transactions exist).
     var old_balance_d12 = 0;
     var old_balance_underflow_d12 = 0;
     if (old_sent_acct_to_dapp_d12 >= old_sent_dapp_to_acct_d12) {
@@ -827,7 +646,6 @@ module {
       old_balance_underflow_d12 = old_balance_underflow_d12;
       old_sent_acct_to_dapp_d12 = old_sent_acct_to_dapp_d12;
       old_sent_dapp_to_acct_d12 = old_sent_dapp_to_acct_d12;
-      is_burner = is_burner;
       old_latest_send_found = old_latest_send_found;
       old_latest_send_txid = old_latest_send_txid;
     };

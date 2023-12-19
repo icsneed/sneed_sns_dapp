@@ -38,11 +38,6 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
       await* Converter.convert_account(get_context_with_account(caller, account));
     };
 
-    // Refunds the balance of an account 
-    public shared ({ caller }) func refund_account(account: T.Account) : async T.RefundOldTokensResult {  
-      await* Converter.refund_account(get_context_with_account(caller, account));
-    };
-
     // Burns the specified amount of old tokens. 
     public shared ({ caller }) func burn_old_tokens(amount : T.Balance) : async T.BurnOldTokensResult {
       await* Converter.burn_old_tokens(get_context_with_anon_account(caller), amount);      

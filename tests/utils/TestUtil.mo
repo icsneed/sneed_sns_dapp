@@ -234,25 +234,20 @@ module {
                                                         + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d12_to_d8)
                                                         - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8)) { return false; };
 
-        if (indexed_account.old_refundable_balance_d12 != indexed_account.old_balance_d12 - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d12_to_d8)) { return false; };
-
         true;
     };
 
 
     public func print_indexed_account(indexed : T.IndexedAccount) : () {
         Debug.print("new_total_balance_d8: " # Nat.toText(indexed.new_total_balance_d8));
-        Debug.print("old_refundable_balance_d12: " # Nat.toText(indexed.old_refundable_balance_d12));
         Debug.print("old_balance_d12: " # Nat.toText(indexed.old_balance_d12));
         Debug.print("new_total_balance_underflow_d8: " # Nat.toText(indexed.new_total_balance_underflow_d8));
-        Debug.print("old_refundable_balance_underflow_d12: " # Nat.toText(indexed.old_refundable_balance_underflow_d12));
         Debug.print("old_balance_underflow_d12: " # Nat.toText(indexed.old_balance_underflow_d12));
         Debug.print("new_sent_acct_to_dapp_d8: " # Nat.toText(indexed.new_sent_acct_to_dapp_d8));
         Debug.print("new_sent_dapp_to_acct_d8: " # Nat.toText(indexed.new_sent_dapp_to_acct_d8));
         Debug.print("old_sent_acct_to_dapp_d12: " # Nat.toText(indexed.old_sent_acct_to_dapp_d12));
         Debug.print("old_sent_dapp_to_acct_d12: " # Nat.toText(indexed.old_sent_dapp_to_acct_d12));
         Debug.print("is_seeder: " # Bool.toText(indexed.is_seeder));
-        Debug.print("is_burner: " # Bool.toText(indexed.is_burner));
         Debug.print("old_latest_send_found: " # Bool.toText(indexed.old_latest_send_found));
         switch (indexed.old_latest_send_txid) {
             case (null) { Debug.print("old_latest_send_txid: null"); };
@@ -270,7 +265,6 @@ module {
         Debug.print("old_balance_underflow_d12: " # Nat.toText(indexed.old_balance_underflow_d12));
         Debug.print("old_sent_acct_to_dapp_d12: " # Nat.toText(indexed.old_sent_acct_to_dapp_d12));
         Debug.print("old_sent_dapp_to_acct_d12: " # Nat.toText(indexed.old_sent_dapp_to_acct_d12));
-        Debug.print("is_burner: " # Bool.toText(indexed.is_burner));
         Debug.print("old_latest_send_found: " # Bool.toText(indexed.old_latest_send_found));
         switch (indexed.old_latest_send_txid) {
             case (null) { Debug.print("old_latest_send_txid: null"); };

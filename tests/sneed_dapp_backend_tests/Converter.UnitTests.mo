@@ -46,7 +46,6 @@ module {
                             indexedOldAccount.old_balance_underflow_d12 == 0,                            
                             indexedOldAccount.old_sent_acct_to_dapp_d12 == 0,
                             indexedOldAccount.old_sent_dapp_to_acct_d12 == 0,
-                            indexedOldAccount.is_burner == false,
                             indexedOldAccount.old_latest_send_found == false,
                             indexedOldAccount.old_latest_send_txid == null
                          ]);
@@ -87,7 +86,6 @@ module {
                             indexedOldAccount.old_balance_underflow_d12 == 0,                            
                             indexedOldAccount.old_sent_acct_to_dapp_d12 == old_amount_d12,
                             indexedOldAccount.old_sent_dapp_to_acct_d12 == 0,
-                            indexedOldAccount.is_burner == false,
                             indexedOldAccount.old_latest_send_found == false,
                             indexedOldAccount.old_latest_send_txid == null
                          ]);
@@ -135,7 +133,6 @@ module {
                             indexedOldAccount.old_balance_underflow_d12 == 0,                            
                             indexedOldAccount.old_sent_acct_to_dapp_d12 == old_total_d12,
                             indexedOldAccount.old_sent_dapp_to_acct_d12 == 0,
-                            indexedOldAccount.is_burner == false,
                             indexedOldAccount.old_latest_send_found == false,
                             indexedOldAccount.old_latest_send_txid == null
                          ]);
@@ -190,7 +187,6 @@ module {
                             indexedOldAccount.old_balance_underflow_d12 == 0,                            
                             indexedOldAccount.old_sent_acct_to_dapp_d12 == old_acct_sent_total_d12,
                             indexedOldAccount.old_sent_dapp_to_acct_d12 == old_amount3_d12 + old_fee_d12,
-                            indexedOldAccount.is_burner == false,
                             indexedOldAccount.old_latest_send_found == true,
                             indexedOldAccount.old_latest_send_txid == ?125
                          ]);
@@ -253,7 +249,6 @@ module {
                             indexedOldAccount.old_balance_underflow_d12 == old_underflow_d12,               // 2000100000000                          
                             indexedOldAccount.old_sent_acct_to_dapp_d12 == old_acct_sent_total_d12,         // 3000000000000
                             indexedOldAccount.old_sent_dapp_to_acct_d12 == old_amount3_d12 + old_fee_d12,   // 5000100000000
-                            indexedOldAccount.is_burner == false,
                             indexedOldAccount.old_latest_send_found == true,
                             indexedOldAccount.old_latest_send_txid == ?125
                          ]);
@@ -307,7 +302,6 @@ module {
                             indexedOldAccount.old_balance_underflow_d12 == old_amount_d12 + old_fee_d12,
                             indexedOldAccount.old_sent_acct_to_dapp_d12 == 0,
                             indexedOldAccount.old_sent_dapp_to_acct_d12 == old_amount_d12 + old_fee_d12,
-                            indexedOldAccount.is_burner == false,
                             indexedOldAccount.old_latest_send_found == true,
                             indexedOldAccount.old_latest_send_txid == ?100
                          ]);
@@ -333,30 +327,6 @@ module {
                             indexedNewAccount.is_seeder == false,
                             indexedNewAccount.new_latest_send_found == true,
                             indexedNewAccount.new_latest_send_txid == ?100
-                         ]);
-
-                    },
-                ),
-                it(
-                    "Indexing huge Account-to-dApp transaction for old token should result in account being tagged with is_burner=true.",
-                    do {
-                        let context = TestUtil.get_context();
-                        let old_amount_d12 = 1001000000000000; // 1001 tokens
-                        let old_fee_d12 = context.state.persistent.settings.old_fee_d12;
-
-                        //amount is inclusive of fee for old token
-                        let tx = TestUtil.get_old_acct_to_dapp_tx(context, 100, old_amount_d12 + old_fee_d12);
-                        let transactions : [T.OldTransaction] = [ tx ];
-
-                        let indexedOldAccount = Converter.IndexOldBalance(context, transactions);
-                        assertAllTrue([ 
-                            indexedOldAccount.old_balance_d12 == old_amount_d12,
-                            indexedOldAccount.old_balance_underflow_d12 == 0,
-                            indexedOldAccount.old_sent_acct_to_dapp_d12 == old_amount_d12,
-                            indexedOldAccount.old_sent_dapp_to_acct_d12 == 0,
-                            indexedOldAccount.is_burner == true,
-                            indexedOldAccount.old_latest_send_found == false,
-                            indexedOldAccount.old_latest_send_txid == null
                          ]);
 
                     },
@@ -419,7 +389,6 @@ module {
                             indexedOldAccount.old_balance_underflow_d12 == 0,                            
                             indexedOldAccount.old_sent_acct_to_dapp_d12 == old_acct_sent_total_d12,
                             indexedOldAccount.old_sent_dapp_to_acct_d12 == old_amount3_d12 + old_fee_d12,
-                            indexedOldAccount.is_burner == false,
                             indexedOldAccount.old_latest_send_found == true,
                             indexedOldAccount.old_latest_send_txid == ?125
                          ]);
@@ -494,7 +463,6 @@ module {
                             indexedOldAccount.old_balance_underflow_d12 == 0,                            
                             indexedOldAccount.old_sent_acct_to_dapp_d12 == old_acct_sent_total_d12,
                             indexedOldAccount.old_sent_dapp_to_acct_d12 == old_amount3_d12 + old_fee_d12,
-                            indexedOldAccount.is_burner == false,
                             indexedOldAccount.old_latest_send_found == true,
                             indexedOldAccount.old_latest_send_txid == ?125
                          ]);
@@ -559,16 +527,12 @@ module {
                         let old_settings = Converter.get_settings(context);
                         let new_settings : T.Settings = {
                             allow_conversions = false;
-                            allow_refunds = true;
                             allow_burns = false;
-                            allow_burner_refunds = true;
                             allow_seeder_conversions  = false;
-                            allow_burner_conversions = true;
                             new_fee_d8 = 12345678;
                             old_fee_d12 = 987654321;
                             d12_to_d8 = 9999;
                             new_seeder_min_amount_d8 = 99999999999;
-                            old_burner_min_amount_d12 = 77777777777;
                             cooldown_ns = 42;                                 
                         };
 
@@ -577,29 +541,21 @@ module {
 
                         assertAllTrue([ 
                             old_settings.allow_conversions == true,
-                            old_settings.allow_refunds == true,
                             old_settings.allow_burns == true,
-                            old_settings.allow_burner_refunds == false,
                             old_settings.allow_seeder_conversions == false,
-                            old_settings.allow_burner_conversions == false,
                             old_settings.new_fee_d8 == 1_000,
                             old_settings.old_fee_d12 ==100_000_000,
                             old_settings.d12_to_d8 == 10_000,
                             old_settings.new_seeder_min_amount_d8 ==100_000_000_000,
-                            old_settings.old_burner_min_amount_d12 == 1000_000_000_000_000,
                             old_settings.cooldown_ns == 3600000000000,
 
                             new_settings.allow_conversions == new_settings_result.allow_conversions,
-                            new_settings.allow_refunds == new_settings_result.allow_refunds,
                             new_settings.allow_burns == new_settings_result.allow_burns,
-                            new_settings.allow_burner_refunds == new_settings_result.allow_burner_refunds,
                             new_settings.allow_seeder_conversions == new_settings_result.allow_seeder_conversions,
-                            new_settings.allow_burner_conversions == new_settings_result.allow_burner_conversions,
                             new_settings.new_fee_d8 == new_settings_result.new_fee_d8,
                             new_settings.old_fee_d12 == new_settings_result.old_fee_d12,
                             new_settings.d12_to_d8 == new_settings_result.d12_to_d8,
                             new_settings.new_seeder_min_amount_d8 == new_settings_result.new_seeder_min_amount_d8,
-                            new_settings.old_burner_min_amount_d12 == new_settings_result.old_burner_min_amount_d12,
                             new_settings.cooldown_ns == new_settings_result.cooldown_ns
                         ]);
                     },

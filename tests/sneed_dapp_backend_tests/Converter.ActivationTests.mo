@@ -57,18 +57,6 @@ module {
                     },
                 ),
                 it(
-                    "Should not be able to call refund_account before activation.",
-                    do {
-
-                        let context = TestUtil.get_context();
-                        switch (await* Converter.refund_account(context)) {
-                            case (#Err(#NotActive)) { true };
-                            case _ { Debug.trap("Should not have been able to call refund_account before activation!"); };
-                        };
-
-                    },
-                ),
-                it(
                     "Should not be able to call burn_old_tokens before activation.",
                     do {
 
@@ -102,20 +90,6 @@ module {
                             let context = TestUtil.get_caller_active_context(controller);
                             let waste = await* Converter.convert_account(context);
                             Debug.trap("Should not have been able to complete call to convert_account with fake canister ids!");
-                        } catch (e) {
-                            Error.message(e) == "Canister czysu-eaaaa-aaaag-qcvdq-cai not found"
-                        };
-
-                    },
-                ),
-                it(
-                    "Should be able to call refund_account after activation.",
-                    do {
-
-                        try {
-                            let context = TestUtil.get_caller_active_context(controller);
-                            let waste = await* Converter.refund_account(context);
-                            Debug.trap("Should not have been able to complete call to refund_account with fake canister ids!");
                         } catch (e) {
                             Error.message(e) == "Canister czysu-eaaaa-aaaag-qcvdq-cai not found"
                         };
