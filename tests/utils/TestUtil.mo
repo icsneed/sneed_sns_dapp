@@ -18,6 +18,35 @@ import ActorSpec "ActorSpec";
 
 module {
 
+
+    public func verify_indexed_account_invariants(context : T.ConverterContext, indexed_account : T.IndexedAccount) : Bool {
+        let settings = context.state.persistent.settings;
+
+        if (indexed_account.old_sent_dapp_to_acct_d12 > indexed_account.old_sent_acct_to_dapp_d12) {
+            if (indexed_account.old_balance_d12 != 0) { return false; };
+            if (indexed_account.old_balance_underflow_d12 != indexed_account.old_sent_dapp_to_acct_d12 - indexed_account.old_sent_acct_to_dapp_d12) { return false; };
+        } else {
+            if (indexed_account.old_balance_d12 != indexed_account.old_sent_acct_to_dapp_d12 - indexed_account.old_sent_dapp_to_acct_d12) { return false; };
+            if (indexed_account.old_balance_underflow_d12 != 0) { return false; };
+        };
+
+        if (indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_d12 > indexed_account.old_balance_d12 
+                                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_d12)) {
+            if (indexed_account.new_total_balance_underflow_d8 * settings.d8_to_d12 != indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_d12
+                                                            - (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_d12)
+                                                            - (indexed_account.old_balance_d12)) { return false; };
+            if (indexed_account.new_total_balance_d8 != 0) { return false; };
+        } else {
+            if (indexed_account.new_total_balance_d8 * settings.d8_to_d12 != indexed_account.old_balance_d12 
+                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_d12)
+                                                            - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_d12)) { return false; };
+            if (indexed_account.new_total_balance_underflow_d8 != 0) { return false; };
+        };
+
+        true;
+    };
+
+
     let test_ids : [Text] = [
         "cpi23-5qaaa-aaaag-qcs5a-cai",
         "rkf6t-7iaaa-aaaag-qco6a-cai",
@@ -207,6 +236,13 @@ module {
             }
         };
     };
+    
+    public func is_ok_convert_result(result : T.ConvertResult) : Bool {
+        switch (result) {
+            case (#Err(err)) { false };
+            case (#Ok(tx_index2)) { true };
+        };
+    };
 
     public func log_last_seen_old(context : T.ConverterContext, index : T.TxIndex) : () {
         context.state.ephemeral.old_latest_sent_txids.put(context.account.owner, index);
@@ -216,34 +252,56 @@ module {
         context.state.ephemeral.new_latest_sent_txids.put(context.account.owner, index);
     };
 
-
-    public func verify_indexed_account_invariants(context : T.ConverterContext, indexed_account : T.IndexedAccount) : Bool {
-        let settings = context.state.persistent.settings;
-
-        if (indexed_account.old_sent_dapp_to_acct_d12 > indexed_account.old_sent_acct_to_dapp_d12) {
-            if (indexed_account.old_balance_d12 != 0) { return false; };
-            if (indexed_account.old_balance_underflow_d12 != indexed_account.old_sent_dapp_to_acct_d12 - indexed_account.old_sent_acct_to_dapp_d12) { return false; };
-        } else {
-            if (indexed_account.old_balance_d12 != indexed_account.old_sent_acct_to_dapp_d12 - indexed_account.old_sent_dapp_to_acct_d12) { return false; };
-            if (indexed_account.old_balance_underflow_d12 != 0) { return false; };
+    public func must_get_latest_log_item(log : [T.LogItem]) : T.LogItem {
+        switch (get_latest_log_item(log)) {
+            case (null) { Debug.trap("Expected log item"); };
+            case (?item) { item; };
         };
-
-        if (indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_12 > indexed_account.old_balance_d12 
-                                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_12)) {
-            if (indexed_account.new_total_balance_underflow_d8 * settings.d8_to_12 != indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_12
-                                                            - (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_12)
-                                                            - (indexed_account.old_balance_d12)) { return false; };
-            if (indexed_account.new_total_balance_d8 != 0) { return false; };
-        } else {
-            if (indexed_account.new_total_balance_d8 * settings.d8_to_12 != indexed_account.old_balance_d12 
-                                                            + (indexed_account.new_sent_acct_to_dapp_d8 * settings.d8_to_12)
-                                                            - (indexed_account.new_sent_dapp_to_acct_d8 * settings.d8_to_12)) { return false; };
-            if (indexed_account.new_total_balance_underflow_d8 != 0) { return false; };
-        };
-
-        true;
     };
 
+    public func get_latest_log_item(log : [T.LogItem]) : ?T.LogItem {
+        if (log.size() < 1) { return null; };
+        ?log.get(log.size() -1);
+    };
+
+    public func must_get_convert_log_item(log_item : ?T.LogItem) : T.ConvertLogItem {
+        switch (get_convert_log_item(log_item)) {
+            case (null) { Debug.trap("Expected convert log item"); };
+            case (?convert) { convert; };
+        };
+    };
+
+    public func get_convert_log_item(log_item : ?T.LogItem) : ?T.ConvertLogItem {
+        switch (log_item) {
+            case (null) { null; };
+            case (?item) {
+                item.convert;
+            };
+        };
+    };
+
+    public func print_log_item(log_item : ?T.LogItem) : () {
+        switch (log_item) {
+            case (null) { Debug.print("log_item: null"); };
+            case (?item) { 
+                Debug.print("message: " # item.message);
+                Debug.print("timestamp: " # Nat64.toText(item.timestamp));
+                switch (item.convert) {
+                    case null { };
+                    case (?convert) { print_convert_log_item(convert); };
+                };
+            };
+        };
+    };
+
+    public func print_convert_log_item(convert : T.ConvertLogItem) : () {
+        switch (convert.result) {
+            case (#Ok(tx_index)) { Debug.print("convert.result: #Ok(" # Nat.toText(tx_index) # ")"); };
+            case _ { Debug.print("convert.result: Error."); };
+        };
+        Debug.print("convert.args.amount: " # Nat.toText(convert.args.amount));
+        print_indexed_account(convert.account);
+    };
 
     public func print_indexed_account(indexed : T.IndexedAccount) : () {
         Debug.print("new_total_balance_d8: " # Nat.toText(indexed.new_total_balance_d8));

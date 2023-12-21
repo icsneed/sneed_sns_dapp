@@ -24,8 +24,8 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
 
     state.ephemeral.new_latest_sent_txids := Map.fromIter<Principal, T.TxIndex>(persistent.stable_new_latest_sent_txids.vals(), 10, Principal.equal, Principal.hash);
     state.ephemeral.old_latest_sent_txids := Map.fromIter<Principal, T.TxIndex>(persistent.stable_old_latest_sent_txids.vals(), 10, Principal.equal, Principal.hash);
-
-
+    state.ephemeral.log := Buffer.fromArray<T.LogItem>(persistent.stable_log); 
+    
 // PUBLIC API
 
     // Returns the status of an account 
@@ -68,6 +68,10 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
         new_indexer_canister_id);      
     };  
 
+    public shared ({ caller }) func get_log() : async [T.LogItem] {
+      Converter.get_log(get_context_with_anon_account(caller));      
+    };  
+
 // PRIVATE FUNCTIONS
 
     // The account representing this dApp
@@ -105,16 +109,19 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
             converter = sneed_converter_account();
         };    
     };
+
 /// SYSTEM EVENTS ///  
 
     system func preupgrade() {
       persistent.stable_new_latest_sent_txids := Iter.toArray(state.ephemeral.new_latest_sent_txids.entries());
       persistent.stable_old_latest_sent_txids := Iter.toArray(state.ephemeral.old_latest_sent_txids.entries());
+      persistent.stable_log := Buffer.toArray(state.ephemeral.log);
     };
 
     system func postupgrade() {
       persistent.stable_new_latest_sent_txids := [];
       persistent.stable_old_latest_sent_txids := [];
+      persistent.stable_log := [];
     };
 
 };

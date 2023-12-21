@@ -76,6 +76,10 @@ module {
     let stable_old_latest_sent_txids : [(Principal, T.TxIndex)]= [];
     let old_latest_sent_txids = Map.HashMap<Principal, T.TxIndex>(10, Principal.equal, Principal.hash); //Map.fromIter<Principal, T.TxIndex>(stable_old_latest_sent_txids.vals(), 10, Principal.equal, Principal.hash);
 
+    // log
+    let stable_log : [T.LogItem] = [];
+    let log : T.Log = Buffer.Buffer<T.LogItem>(10);
+
     // dApp settings
     let allow_conversions = true;
     let allow_burns = true;
@@ -84,7 +88,7 @@ module {
     let new_fee_d8 = 1_000;
     let old_fee_d12 = 100_000_000;
 
-    let d8_to_12 : Int = 10_000; // 12 to 8 decimals
+    let d8_to_d12 : Int = 10_000; // 12 to 8 decimals
 
     // An account sending this amount or more of the NEW token to the dApp is considered a "Seeder".
     // Seeders cannot use the "convert" function to return their funds if "allow_seeder_conversions" is false. 
@@ -130,6 +134,7 @@ module {
         
             var stable_new_latest_sent_txids = stable_new_latest_sent_txids;
             var stable_old_latest_sent_txids = stable_old_latest_sent_txids;
+            var stable_log = stable_log;
 
             var old_token_canister = old_token_canister;
             var old_indexer_canister = old_indexer_canister;
@@ -143,13 +148,14 @@ module {
 
                 new_fee_d8 = new_fee_d8;
                 old_fee_d12 = old_fee_d12;
-                d8_to_12 = d8_to_12;
+                d8_to_d12 = d8_to_d12;
 
                 new_seeder_min_amount_d8 = new_seeder_min_amount_d8;
                 old_burner_min_amount_d12 = old_burner_min_amount_d12;
                 cooldown_ns = cooldown_ns; 
 
             };
+
         };
 
         ephemeral = {
@@ -157,6 +163,7 @@ module {
             var new_latest_sent_txids = new_latest_sent_txids;
             var old_latest_sent_txids = old_latest_sent_txids;
             var cooldowns = cooldowns;
+            var log = log;
 
         };
     };
@@ -188,23 +195,6 @@ module {
   // for that same account again before the specified cooldown period has passed.
   public func convert_account(context : T.ConverterContext) : async* T.ConvertResult {
 
-    // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
-    if (not IsActive(context)) { return #Err(#NotActive); };
-
-    // Ensure account is valid
-    if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
-
-    // Ensure the account is not on cooldown.
-    if (OnCooldown(context, context.account.owner)) {
-      return #Err(#OnCooldown { 
-        since = CooldownSince(context, context.account.owner); 
-        remaining = CooldownRemaining(context, context.account.owner); })
-    };
-
-    // The account was not on cooldown, so we start 
-    // the cooldown timer and proceed with the conversion
-    context.state.ephemeral.cooldowns.put(context.account.owner, Time.now());
-
     // Convert from old to new tokens.
     await* ConvertOldTokens(context, null);
     
@@ -215,25 +205,6 @@ module {
   // NB: users will still be able to convert their balances to NEW token,
   //     even when the OLD tokens on the dApp have been burned.
   public func burn_old_tokens(context : T.ConverterContext, amount : T.Balance) : async* T.BurnOldTokensResult {
-
-    // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
-    if (not IsActive(context)) { return #Err(#NotActive); };
-    
-    // Ensure only controllers can call this function
-    assert Principal.isController(context.caller);
-
-    // TODO: Ensure the caller is not on cooldown.
-    if (OnCooldown(context, context.caller)) {
-      return #Err(#OnCooldown { 
-        since = CooldownSince(context, context.caller); 
-        remaining = CooldownRemaining(context, context.caller); })
-    };
-
-    // The caller (controller) was not on cooldown, so we start 
-    // the cooldown timer and proceed with the burn.
-    // This prevents an accidental double burn 
-    // (from accidentally doubly entered DAO propositions to burn.)
-    context.state.ephemeral.cooldowns.put(context.caller, Time.now());
 
     //Burn old tokens
     await* BurnOldTokens(context, amount);
@@ -323,6 +294,26 @@ module {
   // 6) Save the transaction index of the sent NEW tokens for later verification
   //    in step 2) if the function is called again for the account.
   public func ConvertOldTokens(context : T.ConverterContext, amount_d8: ?T.Balance) : async* T.ConvertResult {
+
+    // Initial Validation
+
+    // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
+    if (not IsActive(context)) { return #Err(#NotActive); };
+
+    // Ensure account is valid
+    if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
+
+    // Ensure the account is not on cooldown.
+    if (OnCooldown(context, context.account.owner)) {
+      return #Err(#OnCooldown { 
+        since = CooldownSince(context, context.account.owner); 
+        remaining = CooldownRemaining(context, context.account.owner); })
+    };
+
+    // The account was not on cooldown, so we start 
+    // the cooldown timer and proceed with the conversion
+    context.state.ephemeral.cooldowns.put(context.account.owner, Time.now());
+
 
     // Extract account from context
     let account = context.account;
@@ -435,11 +426,14 @@ module {
         let transfer_result = await state.persistent.new_token_canister.icrc1_transfer(transfer_args);
 
         // If the transaction succeeded, save away the index of the transfer transaction 
-        // for verification during any possible subsequent calls to "convert" for the same account.  
+        // for verification during any possible subsequent calls to "convert" for the same account.          
         switch (transfer_result) {
           case (#Ok(txid)) { state.ephemeral.new_latest_sent_txids.put(account.owner, txid); };
           case _ { /* do nothing*/ };
         };
+
+        // Log the transaction attempt
+        log_convert_call(context, transfer_result, transfer_args, indexed_account);
 
         // Return the result of the transfer transaction.
         transfer_result;
@@ -450,6 +444,28 @@ module {
 
   // Burn OLD tokens stored on the dApp.
   public func BurnOldTokens(context : T.ConverterContext, amount_d12: T.Balance) : async* T.BurnOldTokensResult {
+
+    // Initial Validation
+
+    // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
+    if (not IsActive(context)) { return #Err(#NotActive); };
+    
+    // Ensure only controllers can call this function
+    assert Principal.isController(context.caller);
+
+    // TODO: Ensure the caller is not on cooldown.
+    if (OnCooldown(context, context.caller)) {
+      return #Err(#OnCooldown { 
+        since = CooldownSince(context, context.caller); 
+        remaining = CooldownRemaining(context, context.caller); })
+    };
+
+    // The caller (controller) was not on cooldown, so we start 
+    // the cooldown timer and proceed with the burn.
+    // This prevents an accidental double burn 
+    // (from accidentally doubly entered DAO propositions to burn.)
+    context.state.ephemeral.cooldowns.put(context.caller, Time.now());
+
 
     // Extract state from context
     let state = context.state;
@@ -523,7 +539,7 @@ module {
         let old_balance_d12 = old_balance_result.old_balance_d12;
 
         // Convert the OLD token balance from d12 to d8. 
-        let old_balance_d8 : T.Balance = Int.abs(old_balance_d12 / settings.d8_to_12);
+        let old_balance_d8 : T.Balance = Int.abs(old_balance_d12 / settings.d8_to_d12);
 
         // Perform sub-indexing of the NEW token transactions for the account. 
         // Pick out the transactions that are between the dApp and the account.
@@ -549,7 +565,7 @@ module {
           new_total_balance_d8 := 0;
         };
 
-        let new_sent_dapp_to_acct_d12 : T.Balance = Int.abs(new_sent_dapp_to_acct_d8 * settings.d8_to_12);
+        let new_sent_dapp_to_acct_d12 : T.Balance = Int.abs(new_sent_dapp_to_acct_d8 * settings.d8_to_d12);
         
         // Return the results of the account indexing operation:
         return #Ok({
@@ -754,7 +770,6 @@ module {
     };
   };
 
-
   // Check if the account is on cooldown (i.e. they have to wait until their cooldown expires to call "convert")
   public func OnCooldown(context : T.ConverterContext, owner : Principal) : Bool {
 
@@ -846,12 +861,35 @@ module {
       };
   };
 
-
+  // Checks if the application is active (all four collaborator canisters have been assigned.)
   public func IsActive(context : T.ConverterContext) : Bool {
     Principal.isAnonymous(Principal.fromActor(context.state.persistent.old_token_canister)) == false and 
       Principal.isAnonymous(Principal.fromActor(context.state.persistent.old_indexer_canister)) == false and
       Principal.isAnonymous(Principal.fromActor(context.state.persistent.new_token_canister)) == false and 
       Principal.isAnonymous(Principal.fromActor(context.state.persistent.new_indexer_canister)) == false 
+  };
+
+  public func get_log(context : T.ConverterContext) : [T.LogItem] {
+    
+    // Ensure only controllers can call this function
+    //assert Principal.isController(context.caller);
+
+    Buffer.toArray(context.state.ephemeral.log);
+
+  };
+
+  public func log_convert_call(context : T.ConverterContext, result : T.TransferResult, args : T.TransferArgs, account : T.IndexedAccount) : () {
+    let logItem : T.LogItem = {
+      message = "Conversion";
+      timestamp = Nat64.fromNat(Int.abs(Time.now()));
+      convert = ?{
+        result = result;
+        args = args;
+        account = account;
+      }
+    };
+
+    context.state.ephemeral.log.add(logItem);
   };
 
 };

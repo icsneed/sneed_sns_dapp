@@ -18,6 +18,7 @@ type Subaccount = Blob;
 type TxIndex = Nat;
 type Balance = Nat;
 type TxIndexes = List.List<TxIndex>;
+type Log = Buffer.Buffer<LogItem>;
      
 type ConverterContext = {
     caller : Principal;
@@ -37,6 +38,7 @@ type ConverterPersistentState = {
 
     var stable_new_latest_sent_txids : [(Principal, TxIndex)];
     var stable_old_latest_sent_txids : [(Principal, TxIndex)];
+    var stable_log : [LogItem];
 
     var old_token_canister : TokenInterface;
     var old_indexer_canister : OldIndexerInterface;
@@ -51,6 +53,7 @@ type ConverterEphemeralState = {
     var new_latest_sent_txids : Map.HashMap<Principal, TxIndex>;
     var old_latest_sent_txids : Map.HashMap<Principal, TxIndex>;
     var cooldowns : Map.HashMap<Principal, Time.Time>;
+    var log : Log;
 };
 
 type Account = {
@@ -287,10 +290,22 @@ type Settings = {
   allow_burns : Bool;
   new_fee_d8 : Balance;
   old_fee_d12 : Balance;
-  d8_to_12 : Int;
+  d8_to_d12 : Int;
   new_seeder_min_amount_d8 : Balance;
   old_burner_min_amount_d12 : Balance;
   cooldown_ns : Nat; 
+};
+
+type LogItem = {
+    message : Text;
+    timestamp : Timestamp;
+    convert : ?ConvertLogItem;
+};
+
+type ConvertLogItem = {
+    result : TransferResult;
+    args : TransferArgs;
+    account : IndexedAccount;
 };
 
 type Mocks = {

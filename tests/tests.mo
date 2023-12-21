@@ -5,6 +5,7 @@ import Debug "mo:base/Debug";
 import UnitTests "sneed_dapp_backend_tests/Converter.UnitTests";
 import ActivationTests "sneed_dapp_backend_tests/Converter.ActivationTests";
 import IndexingTests "sneed_dapp_backend_tests/Converter.IndexingTests";
+import ConversionTests "sneed_dapp_backend_tests/Converter.ConversionTests";
 
 import ActorSpec "./utils/ActorSpec";
 
@@ -14,7 +15,8 @@ actor Tests {
     let test_modules = [
         UnitTests.test,
         ActivationTests.test,
-        IndexingTests.test
+        IndexingTests.test,
+        ConversionTests.test
     ];
 
     public func run_tests() : async () {

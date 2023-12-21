@@ -34,58 +34,53 @@ module {
             "SneedConverter dApp Indexing Tests",
             [
                 it(
-                    "Indexing account with no transactions should yield zero balance.",
+                    "Converting account with no transactions should result in #InsufficientFunds with zero balance.",
                     do {
 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(0));
 
-                        let indexedAccountResult = await* Converter.IndexAccount(context);
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
 
-                        switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
-                            case (#Ok(indexedAccount)) {
-
-                                assertAllTrue([ 
-                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
-
-                                    indexedAccount.new_total_balance_d8 == 0,
-                                    indexedAccount.old_balance_d12 == 0,
-                                    indexedAccount.new_total_balance_underflow_d8 == 0,
-                                    indexedAccount.old_balance_underflow_d12 == 0,
-                                    indexedAccount.new_sent_acct_to_dapp_d8 == 0,
-                                    indexedAccount.new_sent_dapp_to_acct_d8 == 0,
-                                    indexedAccount.old_sent_acct_to_dapp_d12 == 0,
-                                    indexedAccount.old_sent_dapp_to_acct_d12 == 0,
-                                    indexedAccount.is_seeder == false,
-                                    indexedAccount.is_burner == false,
-                                    indexedAccount.old_latest_send_found == false,
-                                    indexedAccount.old_latest_send_txid == null,
-                                    indexedAccount.new_latest_send_found == false,
-                                    indexedAccount.new_latest_send_txid == null
-                                ]);
-
-                            };
+                        switch (convert_result) {
+                            case (#Err(#InsufficientFunds({ balance }))) { assertTrue(balance == 0); };
+                            case _ { Debug.trap("SHould have returned #InsufficientFunds error."); };
                         };
                     },
                 ),
                 it(
-                    "Indexing account with one old token Account-to-dApp transaction should yield a balance matching amount - old_fee.",
+                    "Converting account with one old token Account-to-dApp transaction should result in a conversion.",
                     do {
 
                         // old: (100, 1000000000000, acct, dapp)
-                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(1));
+                        let account = TestUtil.get_test_account(1);
+                        let context = TestUtil.get_account_context_with_mocks(controller, account);
                         let settings = context.state.persistent.settings;
                         let amount1 = 1000000000000; // 1 old token
 
-                        let indexedAccountResult = await* Converter.IndexAccount(context);
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
 
-                        switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
-                            case (#Ok(indexedAccount)) {
+                        switch (convert_result) {
+                            case (#Err(err)) { Debug.trap("Failed"); };
+                            case (#Ok(tx_index)) {
 
-                                assertAllTrue([ 
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
+                                let indexedAccount = convert_log_item.account;
+
+                                assertAllTrue([
+
+                                    tx_index == 1234,
+                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    convert_log_item.args.amount == 99989000,
+                                    convert_log_item.args.from_subaccount == null,
+                                    Converter.CompareAccounts(convert_log_item.args.to, account),
+                                    convert_log_item.args.fee == null,
+                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.created_at_time == null,                                
+                                    convert_log_item.args.amount * settings.d8_to_d12 == amount1 - settings.old_fee_d12 - (settings.new_fee_d8 * settings.d8_to_d12),
+
+                                    // These properties are verified in the IndexingTests, but we double-check they remain as expected
                                     TestUtil.verify_indexed_account_invariants(context, indexedAccount),
-
                                     indexedAccount.new_total_balance_d8 == 99990000,
                                     indexedAccount.old_balance_d12 == 999900000000,
                                     indexedAccount.new_total_balance_underflow_d8 == 0,
@@ -100,35 +95,49 @@ module {
                                     indexedAccount.old_latest_send_txid == null,
                                     indexedAccount.new_latest_send_found == false,
                                     indexedAccount.new_latest_send_txid == null,
-
                                     indexedAccount.old_balance_d12 == amount1 - settings.old_fee_d12,
                                     indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d8_to_d12,
                                     indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12
                                 ]);
-
                             };
                         };
                     },
                 ),
                 it(
-                    "Indexing account with two old token Account-to-dApp transactions should yield a balance matching amounts - (2 * old_fee).",
+                    "Converting account with two old token Account-to-dApp transactions should result in a conversion.",
                     do {
 
                         // old: (100, 1000000000000, acct, dapp), (105, 2000000000000, acct, dapp) 
-                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(2));
+                        let account = TestUtil.get_test_account(2);
+                        let context = TestUtil.get_account_context_with_mocks(controller, account);
                         let settings = context.state.persistent.settings;
                         let amount1 = 1000000000000; // 1 old token
                         let amount2 = 2000000000000; // 2 old tokens
 
-                        let indexedAccountResult = await* Converter.IndexAccount(context);
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
 
-                        switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
-                            case (#Ok(indexedAccount)) {
+                        switch (convert_result) {
+                            case (#Err(err)) { Debug.trap("Failed"); };
+                            case (#Ok(tx_index)) {
 
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
+                                let indexedAccount = convert_log_item.account;
+TestUtil.print_log_item(?log_item);
                                 assertAllTrue([ 
-                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),
-                                    
+
+                                    tx_index == 1234,
+                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    convert_log_item.args.amount == 299979000,
+                                    convert_log_item.args.from_subaccount == null,
+                                    Converter.CompareAccounts(convert_log_item.args.to, account),
+                                    convert_log_item.args.fee == null,
+                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.created_at_time == null,                                    
+                                    convert_log_item.args.amount * settings.d8_to_d12 == amount1 + amount2 - (2 * settings.old_fee_d12) 
+                                                                                            - (settings.new_fee_d8 * settings.d8_to_d12),
+
+                                    TestUtil.verify_indexed_account_invariants(context, indexedAccount),                                    
                                     indexedAccount.new_total_balance_d8 == 299980000,
                                     indexedAccount.old_balance_d12 == 2999800000000,
                                     indexedAccount.new_total_balance_underflow_d8 == 0,
@@ -143,7 +152,6 @@ module {
                                     indexedAccount.old_latest_send_txid == null,
                                     indexedAccount.new_latest_send_found == false,
                                     indexedAccount.new_latest_send_txid == null,
-
                                     indexedAccount.old_balance_d12 == (amount1 + amount2) - (2 * settings.old_fee_d12),
                                     indexedAccount.old_balance_d12 == indexedAccount.new_total_balance_d8 * settings.d8_to_d12,
                                     indexedAccount.old_balance_d12 == indexedAccount.old_sent_acct_to_dapp_d12
@@ -152,7 +160,7 @@ module {
                             };
                         };
                     },
-                ),
+                )/*,
                 it(
                     "Indexing account with two old token Account-to-dApp transactions and one old token dApp-to-Account transaction (refund) "
                         # "should yield a balance matching a2d amounts - (2 * old_fee) - d2a amount. Refunds are not supported by the dApp, " 
@@ -1005,7 +1013,7 @@ module {
                             };
                         };
                     },
-                )
+                )*/
             ]
         );
     };
