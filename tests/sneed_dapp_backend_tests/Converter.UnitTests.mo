@@ -714,7 +714,7 @@ module {
                     }
                 )
 
-                // TODO: Test decimal conversion
+                // TODO: Test logging
             ]
         );
     };

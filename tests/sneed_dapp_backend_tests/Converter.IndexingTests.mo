@@ -1,3 +1,12 @@
+// NB: For each test it is noted in comments what transactions the mock indexers will return for the 
+// particular test account that is used in the test (see tests/mocks/MewIndexerCanisterMock.mo and 
+// tests/mocks/OldIndexerCanisterMock.mo), using the following notation:
+// old/new: (tx index, amount [as integer, no decimals], from, to)
+// An old token transaction with transaction index 10, sending exactly one token from the account
+// to the dApp would be: old: (10, 1000000000000, acct, dapp).
+// A new token transaction with transaction index 11, sending exactly one token from the dApp
+// to the account would be: new: (11, 100000000, dapp, acct).
+
 import Array "mo:base/Array";
 import Error "mo:base/Error";
 import Debug "mo:base/Debug";

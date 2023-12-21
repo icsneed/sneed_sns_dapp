@@ -46,6 +46,15 @@ module {
         true;
     };
 
+    public func verify_convert_log_item_invariants(context : T.ConverterContext, convert_log_item : T.ConvertLogItem) : Bool {
+        let settings = context.state.persistent.settings;
+        let indexedAccount = convert_log_item.account;
+
+        if (convert_log_item.args.amount * settings.d8_to_d12 != indexedAccount.new_total_balance_d8 * settings.d8_to_d12 
+                                                                - (settings.new_fee_d8 * settings.d8_to_d12)) { return false };
+
+        true;
+    };
 
     let test_ids : [Text] = [
         "cpi23-5qaaa-aaaag-qcs5a-cai",

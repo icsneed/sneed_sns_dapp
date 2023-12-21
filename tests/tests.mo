@@ -7,7 +7,8 @@ import ActivationTests "sneed_dapp_backend_tests/Converter.ActivationTests";
 import IndexingTests "sneed_dapp_backend_tests/Converter.IndexingTests";
 import ConversionTests "sneed_dapp_backend_tests/Converter.ConversionTests";
 
-import ActorSpec "./utils/ActorSpec";
+import ActorSpec "/utils/ActorSpec";
+import TestUtil "/utils/TestUtil";
 
 actor Tests {
     let { run } = ActorSpec;

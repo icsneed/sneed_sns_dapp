@@ -1,9 +1,14 @@
 {
   "sneed_dapp_backend": {
-    "ic": "czysu-eaaaa-aaaag-qcvdq-cai"
+    "ic": "czysu-eaaaa-aaaag-qcvdq-cai",
+    "local": "bd3sg-teaaa-aaaaa-qaaba-cai"
   },
   "sneed_dapp_frontend": {
-    "ic": "duww2-liaaa-aaaag-qcvea-cai"
+    "ic": "duww2-liaaa-aaaag-qcvea-cai",
+    "local": "bkyz2-fmaaa-aaaaa-qaaaq-cai"
+  },
+  "sneed_dapp_tests": {
+    "local": "by6od-j4aaa-aaaaa-qaadq-cai"
   },
   "sneed_dapp_old_token_mock": {
     "local": "b77ix-eeaaa-aaaaa-qaada-cai"

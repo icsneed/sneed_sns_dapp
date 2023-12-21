@@ -16,10 +16,6 @@ shared actor class OldIndexerMock() : async T.OldIndexerInterface = {
             subaccount = null;
         };
 
-        //if (account == Principal.toText(TestUtil.get_test_account(0).owner)) {
-        //    return [];
-        //};
-
         if (account == Principal.toText(TestUtil.get_test_account(1).owner)) {
             return [ TestUtil.get_old_tx(100, 1000000000000, acct, dapp) ]; // 1 old token
         };

@@ -368,9 +368,6 @@ module {
         // Burners are not allowed to convert their OLD token balances.
         if (indexed_account.is_burner == true) { return #Err(#IsBurner); };
 
-        // Check that there is a positive dApp balance for the account.
-        if (indexed_account.new_total_balance_d8 <= 0) { return #Err(#InsufficientFunds { balance = 0; }); };
-
         // Verify that the indexer did not find any underflow issues.
         if (indexed_account.new_total_balance_underflow_d8 > 0
           or indexed_account.old_balance_underflow_d12 > 0) { 
@@ -383,6 +380,9 @@ module {
             old_sent_dapp_to_acct_d12 = indexed_account.old_sent_dapp_to_acct_d12;
           }); 
         };
+
+        // Check that there is a positive dApp balance for the account.
+        if (indexed_account.new_total_balance_d8 <= 0) { return #Err(#InsufficientFunds { balance = 0; }); };
 
         // put balance and amount in variables that can be sanitized.
         var new_balance_checked_d8 : Nat = indexed_account.new_total_balance_d8;
