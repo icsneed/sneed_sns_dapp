@@ -918,6 +918,35 @@ module {
                             case _ { Debug.trap("Should have returned #StaleIndexer error."); };
                         };
                     },
+                ),
+                it(
+                    "Calling convert when balance matches new fee should result in #ZeroAmount error.",
+                    do {
+
+                        // old: (100, 110000000, acct, dapp)
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(21));
+
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        
+                        switch (convert_result) {
+                            case (#Err(#ZeroAmount)) { true; };                       
+                            case _ { Debug.trap("Should have returned #ZeroAmount error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Calling convert when indexer returns an error should result in #IndexerError error.",
+                    do {
+
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(22));
+
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        
+                        switch (convert_result) {
+                            case (#Err(#IndexerError({ message }))) { assertTrue( message == "Something most unfortunate has occurred." ); };
+                            case _ { Debug.trap("Should have returned #IndexerError error."); };
+                        };
+                    },
                 )
             ]
         );

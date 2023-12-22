@@ -120,6 +120,10 @@ shared actor class NewIndexerMock() : async T.NewIndexerInterface = {
             });            
         };
 
+        if (Converter.CompareAccounts(account, TestUtil.get_test_account(22))) {
+            return #Err({ message = "Something most unfortunate has occurred."; });            
+        };
+
         #Ok({
             transactions = [];
             oldest_tx_id = null;

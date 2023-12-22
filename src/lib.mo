@@ -333,12 +333,7 @@ module {
     switch (indexedAccount) {
       
       // If indexing the account failed, return error    
-      case (#Err({message})) { 
-        return #Err(#GenericError {
-              error_code = 0;
-              message = message;
-          }); 
-      };
+      case (#Err({message})) { return #Err(#IndexerError { message = message; }); };
       
       // Indexing succeeded, proceed with conversion
       case (#Ok(indexed_account)) { 
@@ -406,7 +401,7 @@ module {
         if (new_amount_checked_d8 == new_balance_checked_d8) { new_amount_checked_d8 := new_max_d8};
 
         // Verify that the amount is valid: It must be greater than 0.
-        if (new_amount_checked_d8 <= 0) { return #Err(#GenericError { error_code = 0; message = "Amount must be greater than zero."; }); }; 
+        if (new_amount_checked_d8 <= 0) { return #Err(#ZeroAmount); }; 
 
         // Verify that the balance is valid: It must be greater than or equal to the sum of the amount and the transaction fee.
         if (new_balance_checked_d8 < new_amount_checked_d8 + settings.new_fee_d8) { return #Err(#InsufficientFunds { balance = new_balance_checked_d8; }); };        

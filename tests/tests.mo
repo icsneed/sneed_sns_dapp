@@ -20,14 +20,6 @@ actor Tests {
         ConversionTests.test
     ];
     
-    public func test_it() : async T.ConvertResult {
-        let controller = await* get_controller();
-        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(8));
-
-        let convert_result = await* Converter.ConvertOldTokens(context, null);        
-        convert_result
-    };
-
     public func run_tests() : async () {
         let controller = await* get_controller();
         for (test in test_modules.vals()) {

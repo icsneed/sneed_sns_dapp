@@ -209,6 +209,8 @@ type ConvertError = TransferError or {
     #InvalidAccount;
     #OnCooldown : { since : Int; remaining : Int; };
     #StaleIndexer : { txid: ?TxIndex };
+    #IndexerError : { message: Text };
+    #ZeroAmount;
     #IsSeeder;
     #IsBurner;
     #NotActive;

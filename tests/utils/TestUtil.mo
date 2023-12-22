@@ -79,8 +79,19 @@ module {
         "cb53b-qsf7f-isr4v-tco56-pu475-66ehq-cfkko-doax3-xrnjh-pdo57-zae", 
         "3zjeh-xtbtx-mwebn-37a43-7nbck-qgquk-xtrny-42ujn-gzaxw-ncbzw-kqe", 
         "o2ivq-5dsz3-nba5d-pwbk2-hdd3i-vybeq-qfz35-rqg27-lyesf-xghzc-3ae", 
-        "5oynr-yl472-mav57-c2oxo-g7woc-yytib-mp5bo-kzg3b-622pu-uatef-uqe"
-
+        "5oynr-yl472-mav57-c2oxo-g7woc-yytib-mp5bo-kzg3b-622pu-uatef-uqe",
+        "bdgzk-yzuhn-fa7uj-m6eu4-gyaxu-acj7k-3da6u-nsmqk-ylm55-xdpyx-2qe",
+        "cdc3u-tzbte-m7kkb-itpbd-n6fci-ddby6-cwchd-uf5in-fgyq7-fcd3k-iqe",
+        "h73t4-psgji-yzq63-mkoc5-pueva-zsu72-jwyl6-emflw-eqvsi-n7szy-lqe",
+        "rzzfa-kyclu-choc6-i3bta-dmqhb-uwpah-wodwd-aoowy-rqx4b-bsfrq-wqe",
+        "sbmbj-iieo2-orclf-ezqk7-6sa7m-xzays-m2bqs-dvxrm-keccv-4sqpb-xae",
+        "f2kky-adefd-td7wi-oidzc-jfvf3-4jxop-4etiu-cpfrj-dshjw-sefhl-nae",
+        "bkdfi-fsxtm-4bsgx-3mpaf-p72sg-h7niq-e2ojd-m7tam-4sotv-v25wz-uae",
+        "ktuy7-f3zj3-hj5bk-z2a6v-fdpdy-puxww-mnyby-awzxd-wltxh-lhsr3-2qe",
+        "u5boh-egjgy-766jt-jktcw-wefto-pbbli-uv6ws-qqxl2-c7vml-jwk64-wqe",
+        "pr4sx-mnchz-e5g7k-bm3cv-sgldn-hyoce-krvhb-zh2i3-65zq5-wpxxd-wqe",
+        "qt4zj-xkllb-go2g7-uiyrx-hu2wd-cghjq-6yrts-h45fx-efbk3-gkb2c-oae",
+        "razbm-ydsn3-nyxdm-hebp6-rj5y2-ullnv-wu3yz-z5n5x-pbflj-rnz3s-nae"
     ];
 
     public func get_context() : T.ConverterContext {
