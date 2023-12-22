@@ -174,12 +174,21 @@ module {
   public func get_account(context : T.ConverterContext) : async* T.IndexAccountResult {
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
-    if (not IsActive(context)) { return #Err( { message = "Converter application has not yet been activated."; } ); };
+    if (not IsActive(context)) { return #Err(#NotActive); };
 
     // Ensure account is valid
-    if (not ValidateAccount(context.account)) { return #Err( { message = "Invalid account."; } ); };
+    if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
 
-    await* IndexAccount(context);
+    try {
+
+      // Index the account.
+      await* IndexAccount(context);
+
+    } catch e {
+
+      return #Err(#ExternalCanisterError({ message = Error.message(e) }));
+
+    };
 
   };
 
@@ -195,8 +204,16 @@ module {
   // for that same account again before the specified cooldown period has passed.
   public func convert_account(context : T.ConverterContext) : async* T.ConvertResult {
 
-    // Convert from old to new tokens.
-    await* ConvertOldTokens(context);
+    try {
+
+      // Convert from old to new tokens.
+      await* ConvertAccount(context);
+
+    } catch e {
+
+      return #Err(#ExternalCanisterError({ message = Error.message(e) }));
+
+    };
     
   };
 
@@ -206,8 +223,16 @@ module {
   //     even when the OLD tokens on the dApp have been burned.
   public func burn_old_tokens(context : T.ConverterContext, amount : T.Balance) : async* T.BurnOldTokensResult {
 
-    //Burn old tokens
-    await* BurnOldTokens(context, amount);
+    try {
+
+      //Burn old tokens
+      await* BurnOldTokens(context, amount);
+
+    } catch e {
+
+      return #Err(#ExternalCanisterError({ message = Error.message(e) }));
+
+    };
     
   };  
 
@@ -293,7 +318,7 @@ module {
   //    derived in step 4.
   // 6) Save the transaction index of the sent NEW tokens for later verification
   //    in step 2) if the function is called again for the account.
-  public func ConvertOldTokens(context : T.ConverterContext) : async* T.ConvertResult {
+  public func ConvertAccount(context : T.ConverterContext) : async* T.ConvertResult {
 
     // Initial Validation
 
@@ -333,7 +358,8 @@ module {
     switch (indexedAccount) {
       
       // If indexing the account failed, return error    
-      case (#Err({message})) { return #Err(#IndexerError { message = message; }); };
+      case (#Err(error)) { return #Err(error); };
+      //case (#Err({message})) { return #Err(#ExternalCanisterError { message = message; }); };
       
       // Indexing succeeded, proceed with conversion
       case (#Ok(indexed_account)) { 
@@ -490,7 +516,8 @@ module {
     switch (new_result) {
 
       // If the request to the NEW token indexer failed, return the error.
-      case (#Err(errorType)) { return #Err(errorType); };
+      //case (#Err(errorType)) { return #Err(errorType); };
+      case (#Err({ message })) { return #Err(#ExternalCanisterError({ message = message })); };
 
       // If the request to the NEW token indexer succeeded, proceed with the sub-indexing.
       case (#Ok(new_transactions)) { 

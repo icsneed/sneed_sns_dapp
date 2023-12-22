@@ -489,7 +489,7 @@ module {
                         TestUtil.log_last_seen_old(context, 525);
 
                         let indexedOldAccount = Converter.IndexOldBalance(context, transactions);
-                        TestUtil.print_old_indexed_account(indexedOldAccount);
+
                         assertAllTrue([ 
                             indexedOldAccount.old_balance_d12 == old_total_d12,
                             indexedOldAccount.old_balance_underflow_d12 == 0,                            

@@ -1,6 +1,8 @@
 import Principal "mo:base/Principal";
+import Debug "mo:base/Debug";
 
 import Converter "../../src/";
+
 import T "../../src/Types";
 import TestUtil "../utils/TestUtil";
 
@@ -122,6 +124,10 @@ shared actor class NewIndexerMock() : async T.NewIndexerInterface = {
 
         if (Converter.CompareAccounts(account, TestUtil.get_test_account(23))) {
             return #Err({ message = "Something most unfortunate has occurred."; });            
+        };
+
+        if (Converter.CompareAccounts(account, TestUtil.get_test_account(25))) {
+            Debug.trap("New indexer canister mock trapped.");            
         };
 
         #Ok({

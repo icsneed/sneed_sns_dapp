@@ -209,7 +209,7 @@ type ConvertError = TransferError or {
     #InvalidAccount;
     #OnCooldown : { since : Int; remaining : Int; };
     #StaleIndexer : { txid: ?TxIndex };
-    #IndexerError : { message: Text };
+    #ExternalCanisterError : { message: Text };
     #IsSeeder;
     #IsBurner;
     #NotActive;
@@ -231,7 +231,13 @@ type ConvertResult = {
 
 type IndexAccountResult = {
     #Ok : IndexedAccount;
-    #Err : GetNewTransactionsErr;
+    #Err : IndexAccountError;
+};
+
+type IndexAccountError = {
+    #InvalidAccount;
+    #NotActive;
+    #ExternalCanisterError : { message: Text };   
 };
 
 type IndexedAccount = {

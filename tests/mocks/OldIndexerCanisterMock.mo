@@ -1,4 +1,5 @@
 import Principal "mo:base/Principal";
+import Debug "mo:base/Debug";
 
 import T "../../src/Types";
 import TestUtil "../utils/TestUtil";
@@ -122,6 +123,14 @@ shared actor class OldIndexerMock() : async T.OldIndexerInterface = {
 
         if (account == Principal.toText(TestUtil.get_test_account(22).owner)) {
             return [ TestUtil.get_old_tx(100, 101000000, acct, dapp) ]; // 1 old fee + less than 1 new fee
+        };
+
+        if (account == Principal.toText(TestUtil.get_test_account(24).owner)) {
+            Debug.trap("Old indexer canister mock trapped.")
+        };
+
+        if (account == Principal.toText(TestUtil.get_test_account(26).owner)) {
+            return [ TestUtil.get_old_tx(100, 1000000000000, acct, dapp) ]; // 1 old token
         };
 
         [];

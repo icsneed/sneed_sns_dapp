@@ -51,7 +51,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -89,7 +89,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -132,7 +132,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -179,7 +179,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -228,7 +228,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -283,7 +283,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -347,7 +347,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -404,7 +404,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -443,7 +443,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -487,7 +487,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -532,7 +532,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -578,7 +578,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -626,7 +626,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -675,7 +675,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -720,7 +720,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -763,7 +763,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -807,7 +807,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -851,7 +851,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -893,7 +893,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -936,7 +936,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
@@ -981,7 +981,7 @@ module {
                         let indexedAccountResult = await* Converter.IndexAccount(context);
 
                         switch (indexedAccountResult) {
-                            case (#Err({ message })) { Debug.trap(message); };
+                            case (#Err(error)) { false; };
                             case (#Ok(indexedAccount)) {
 
                                 assertAllTrue([ 
