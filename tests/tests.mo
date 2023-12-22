@@ -19,7 +19,7 @@ actor Tests {
         IndexingTests.test,
         ConversionTests.test
     ];
-    
+
     public func run_tests() : async () {
         let controller = await* get_controller();
         for (test in test_modules.vals()) {

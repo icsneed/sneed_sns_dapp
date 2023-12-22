@@ -120,7 +120,7 @@ shared actor class NewIndexerMock() : async T.NewIndexerInterface = {
             });            
         };
 
-        if (Converter.CompareAccounts(account, TestUtil.get_test_account(22))) {
+        if (Converter.CompareAccounts(account, TestUtil.get_test_account(23))) {
             return #Err({ message = "Something most unfortunate has occurred."; });            
         };
 

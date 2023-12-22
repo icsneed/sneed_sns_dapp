@@ -210,7 +210,6 @@ type ConvertError = TransferError or {
     #OnCooldown : { since : Int; remaining : Int; };
     #StaleIndexer : { txid: ?TxIndex };
     #IndexerError : { message: Text };
-    #ZeroAmount;
     #IsSeeder;
     #IsBurner;
     #NotActive;

@@ -8,6 +8,7 @@
 // to the account would be: new: (11, 100000000, dapp, acct).
 
 import Array "mo:base/Array";
+import Blob "mo:base/Blob";
 import Error "mo:base/Error";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
@@ -49,11 +50,11 @@ module {
 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(0));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#InsufficientFunds({ balance }))) { assertTrue( balance == 0 ); };
-                            case _ { Debug.trap("SHould have returned #InsufficientFunds error."); };
+                            case _ { Debug.trap("Should have returned #InsufficientFunds error."); };
                         };
                     },
                 ),
@@ -67,7 +68,7 @@ module {
                         let settings = context.state.persistent.settings;
                         let amount1 = 1000000000000; // 1 old token
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(err)) { Debug.trap("Failed"); };
@@ -125,7 +126,7 @@ module {
                         let amount1 = 1000000000000; // 1 old token
                         let amount2 = 2000000000000; // 2 old tokens
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(err)) { Debug.trap("Failed"); };
@@ -187,7 +188,7 @@ module {
                         let amount3 = 500000000000; // 0.5 old tokens
                         TestUtil.log_last_seen_old(context, 110);
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(err)) { Debug.trap("Failed"); };
@@ -252,7 +253,7 @@ module {
                         let amount3 = 50000000; // 0.5 new tokens                        
                         TestUtil.log_last_seen_new(context, 115);
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(err)) { Debug.trap("Failed"); };
@@ -325,7 +326,7 @@ module {
                         TestUtil.log_last_seen_old(context, 110);
                         TestUtil.log_last_seen_new(context, 115);
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(err)) { Debug.trap("Failed"); };
@@ -408,7 +409,7 @@ module {
                         TestUtil.log_last_seen_old(context, 110);
                         TestUtil.log_last_seen_new(context, 125);
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(err)) { Debug.trap("Failed"); };
@@ -483,7 +484,7 @@ module {
                         let account = TestUtil.get_test_account(7);
                         let context = TestUtil.get_account_context_with_mocks(controller, account);
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(err)) { Debug.trap("Failed"); };
@@ -532,7 +533,7 @@ module {
                         // old: (100, 1000000000000, acct, dapp), (195, 2000000000000, dapp, acct) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(8));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IndexUnderflow(error))) { 
@@ -558,7 +559,7 @@ module {
                         // new: (115, 200000000, dapp, acct), (185, 100000000, acct, dapp) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(9));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IndexUnderflow(error))) { 
@@ -585,7 +586,7 @@ module {
                         // new: (115, 200000000, dapp, acct) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(10));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IndexUnderflow(error))) { 
@@ -612,7 +613,7 @@ module {
                         // new: (185, 100000000, acct, dapp) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(11));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IndexUnderflow(error))) { 
@@ -639,7 +640,7 @@ module {
                         // new: (115, 200000000, dapp, acct), (185, 100000000, acct, dapp) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(12));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IndexUnderflow(error))) { 
@@ -666,7 +667,7 @@ module {
                         // new: (115, 100000000, dapp, acct) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(13));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IndexUnderflow(error))) { 
@@ -692,7 +693,7 @@ module {
                         // old: (100, 1001000000000000, acct, dapp)
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(14));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IsBurner)) { true };
@@ -707,7 +708,7 @@ module {
                         // old: (100, 2000000000000, acct, dapp), (105, 999000000000000, acct, dapp) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(15));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IsBurner)) { true };
@@ -722,7 +723,7 @@ module {
                         // old: (100, 1001000000000000, acct, dapp), (195, 999000000000000, dapp, acct) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(16));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IsBurner)) { true };
@@ -737,7 +738,7 @@ module {
                         // new: (115, 100100000000, acct, dapp)
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(17));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IsSeeder)) { true };
@@ -752,7 +753,7 @@ module {
                         // new: (115, 200000000, acct, dapp), (125, 99900000000, acct, dapp) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(18));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IsSeeder)) { true };
@@ -767,7 +768,7 @@ module {
                         // new: (115, 100100000000, acct, dapp), (185, 99900000000, dapp, acct) 
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(19));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IsSeeder)) { true };
@@ -783,7 +784,7 @@ module {
                         // new: (115, 100100000000, acct, dapp)                        
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(19));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#IsSeeder)) { true };
@@ -799,7 +800,7 @@ module {
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(3));
                         TestUtil.log_last_seen_old(context, 125); // Simulate not finding the last seen old d2a transaction (125 is not in list from indexer)
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#StaleIndexer( error ))) { 
@@ -824,7 +825,7 @@ module {
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(4));
                         TestUtil.log_last_seen_new(context, 125); // Simulate not finding the last seen old d2a transaction (125 is not in list from indexer)
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#StaleIndexer( error ))) { 
@@ -850,7 +851,7 @@ module {
                         TestUtil.log_last_seen_old(context, 325); // Simulate not finding the last seen old d2a transaction (325 is not in list from indexer)
                         TestUtil.log_last_seen_new(context, 425); // Simulate not finding the last seen old d2a transaction (425 is not in list from indexer)
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result) {
                             case (#Err(#StaleIndexer( error ))) { 
@@ -873,13 +874,11 @@ module {
                         // old: (100, 1000000000000, acct, dapp)
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(1));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
-                        let convert_result2 = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
+                        let convert_result2 = await* Converter.ConvertOldTokens(context);
 
                         switch (convert_result2) {
                             case (#Err(#OnCooldown( error ))) { 
-                                Debug.print("error.since: " # Int.toText(error.since));
-                                Debug.print("error.remaining: " # Int.toText(error.remaining));
                                 assertAllTrue([ 
                                     error.since > 0,
                                     error.remaining > 0 
@@ -896,13 +895,13 @@ module {
                         // old: (100, 1000000000000, acct, dapp)
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(1));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
 
                         let since = Converter.CooldownSince(context, context.account.owner);
                         context.state.ephemeral.cooldowns.put(context.account.owner, since 
                                                                                 - (context.state.persistent.settings.cooldown_ns + 1));
 
-                        let convert_result2 = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result2 = await* Converter.ConvertOldTokens(context);
                         
                         // We expect #StaleIndexer error since the indexer mock will return the same (first) list of transactions for the same account
                         switch (convert_result2) {
@@ -920,17 +919,32 @@ module {
                     },
                 ),
                 it(
-                    "Calling convert when balance matches new fee should result in #ZeroAmount error.",
+                    "Calling convert when balance matches new fee should result in #InsufficientFunds error.",
                     do {
 
                         // old: (100, 110000000, acct, dapp)
                         let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(21));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
                         
                         switch (convert_result) {
-                            case (#Err(#ZeroAmount)) { true; };                       
-                            case _ { Debug.trap("Should have returned #ZeroAmount error."); };
+                            case (#Err(#InsufficientFunds({ balance }))) { assertTrue( balance == 1000 ); };
+                            case _ { Debug.trap("Should have returned #InsufficientFunds error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Calling convert when balance is below new fee should result in #InsufficientFunds error.",
+                    do {
+
+                        // old: (100, 101000000, acct, dapp)
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(22));
+
+                        let convert_result = await* Converter.ConvertOldTokens(context);
+                        
+                        switch (convert_result) {
+                            case (#Err(#InsufficientFunds({ balance }))) { assertTrue( balance == 100 ); };
+                            case _ { Debug.trap("Should have returned #InsufficientFunds error."); };
                         };
                     },
                 ),
@@ -938,13 +952,57 @@ module {
                     "Calling convert when indexer returns an error should result in #IndexerError error.",
                     do {
 
-                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(22));
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(23));
 
-                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result = await* Converter.ConvertOldTokens(context);
                         
                         switch (convert_result) {
                             case (#Err(#IndexerError({ message }))) { assertTrue( message == "Something most unfortunate has occurred." ); };
                             case _ { Debug.trap("Should have returned #IndexerError error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Calling convert with invalid account should result in #InvalidAccount error.",
+                    do {
+                        let account = {
+                            owner = TestUtil.get_test_account(1).owner;
+                            subaccount = ?Blob.fromArray(Array.tabulate(25, Nat8.fromNat));
+                        };
+
+                        let context = TestUtil.get_account_context_with_mocks(controller, account);
+
+                        let convert_result = await* Converter.ConvertOldTokens(context);
+                        
+                        switch (convert_result) {
+                            case (#Err(#InvalidAccount)) { true; };
+                            case _ { Debug.trap("Should have returned #InvalidAccount error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Calling convert when settings.allow_conversions is set to false should result in #ConversionsNotAllowed error.",
+                    do {
+
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(1));
+                        let new_settings : T.Settings = {
+                            allow_conversions = false;
+                            allow_burns = true;
+                            new_fee_d8 = 12345678;
+                            old_fee_d12 = 987654321;
+                            d8_to_d12 = 9999;
+                            new_seeder_min_amount_d8 = 99999999999;
+                            old_burner_min_amount_d12 = 77777777777;
+                            cooldown_ns = 42;                                 
+                        };
+
+                        let ok = Converter.set_settings(context, new_settings);
+
+                        let convert_result = await* Converter.ConvertOldTokens(context);
+                        
+                        switch (convert_result) {
+                            case (#Err(#ConversionsNotAllowed)) { true; };
+                            case _ { Debug.trap("Should have returned #ConversionsNotAllowed error."); };
                         };
                     },
                 )

@@ -196,7 +196,7 @@ module {
   public func convert_account(context : T.ConverterContext) : async* T.ConvertResult {
 
     // Convert from old to new tokens.
-    await* ConvertOldTokens(context, null);
+    await* ConvertOldTokens(context);
     
   };
 
@@ -293,7 +293,7 @@ module {
   //    derived in step 4.
   // 6) Save the transaction index of the sent NEW tokens for later verification
   //    in step 2) if the function is called again for the account.
-  public func ConvertOldTokens(context : T.ConverterContext, amount_d8: ?T.Balance) : async* T.ConvertResult {
+  public func ConvertOldTokens(context : T.ConverterContext) : async* T.ConvertResult {
 
     // Initial Validation
 
@@ -376,35 +376,14 @@ module {
           }); 
         };
 
-        // Check that there is a positive dApp balance for the account.
-        if (indexed_account.new_total_balance_d8 <= 0) { return #Err(#InsufficientFunds { balance = 0; }); };
+        // Extract new total balance
+        let new_total_balance_d8 : Nat = indexed_account.new_total_balance_d8;
 
-        // put balance and amount in variables that can be sanitized.
-        var new_balance_checked_d8 : Nat = indexed_account.new_total_balance_d8;
-        var new_amount_checked_d8 : Nat = 0;
+        // Check that there is a positive dApp balance for the account, greater than the new token fee.
+        if (new_total_balance_d8 <= settings.new_fee_d8) { return #Err(#InsufficientFunds { balance = new_total_balance_d8; }); };
 
-        // Compute the max amount that can be sent (balance - fee)
-        var new_max_d8 = 0;
-        if (new_balance_checked_d8 > settings.new_fee_d8) {
-          new_max_d8 := new_balance_checked_d8 - settings.new_fee_d8;
-        };
-
-        // if no amount was passed to the function's amount_d8 parameter,
-        // use the account's full balance minus the transaction fee as amount.
-        // (NEW token amount is exclusive of fee)
-        switch (amount_d8) {
-          case (null) { new_amount_checked_d8 := new_max_d8; };
-          case (?amt) { new_amount_checked_d8 := amt; };
-        };
-
-        // If the amount matches the full account balance, subtract the transaction fee.
-        if (new_amount_checked_d8 == new_balance_checked_d8) { new_amount_checked_d8 := new_max_d8};
-
-        // Verify that the amount is valid: It must be greater than 0.
-        if (new_amount_checked_d8 <= 0) { return #Err(#ZeroAmount); }; 
-
-        // Verify that the balance is valid: It must be greater than or equal to the sum of the amount and the transaction fee.
-        if (new_balance_checked_d8 < new_amount_checked_d8 + settings.new_fee_d8) { return #Err(#InsufficientFunds { balance = new_balance_checked_d8; }); };        
+        // put amount in variable that can be sanitized.
+        let new_amount_checked_d8 : Nat = new_total_balance_d8 - settings.new_fee_d8;
 
         // Create the arguments for the transfer transaction request.                
         let transfer_args : T.TransferArgs = {
