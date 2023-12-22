@@ -14,6 +14,7 @@ import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Int "mo:base/Int";
 import Nat8 "mo:base/Nat8";
+import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 
 import Converter "../../src/";
@@ -51,7 +52,7 @@ module {
                         let convert_result = await* Converter.ConvertOldTokens(context, null);
 
                         switch (convert_result) {
-                            case (#Err(#InsufficientFunds({ balance }))) { assertTrue(balance == 0); };
+                            case (#Err(#InsufficientFunds({ balance }))) { assertTrue( balance == 0 ); };
                             case _ { Debug.trap("SHould have returned #InsufficientFunds error."); };
                         };
                     },
@@ -857,6 +858,59 @@ module {
                                     case (null) { Debug.trap("Should have returned #StaleIndexer error with transaction index."); };
                                     case (?txid) {
                                         assertTrue( txid == 425 ); 
+
+                                    };
+                                };
+                            };
+                            case _ { Debug.trap("Should have returned #StaleIndexer error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Calling convert twice inside the cooldown period should result in an #OnCooldown error.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp)
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(1));
+
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+                        let convert_result2 = await* Converter.ConvertOldTokens(context, null);
+
+                        switch (convert_result2) {
+                            case (#Err(#OnCooldown( error ))) { 
+                                Debug.print("error.since: " # Int.toText(error.since));
+                                Debug.print("error.remaining: " # Int.toText(error.remaining));
+                                assertAllTrue([ 
+                                    error.since > 0,
+                                    error.remaining > 0 
+                                ]);
+                            };
+                            case _ { Debug.trap("Should have returned #OnCooldown error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Calling convert a second time outside the cooldown period should not result in an #OnCooldown error.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp)
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(1));
+
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+
+                        let since = Converter.CooldownSince(context, context.account.owner);
+                        context.state.ephemeral.cooldowns.put(context.account.owner, since 
+                                                                                - (context.state.persistent.settings.cooldown_ns + 1));
+
+                        let convert_result2 = await* Converter.ConvertOldTokens(context, null);
+                        
+                        // We expect #StaleIndexer error since the indexer mock will return the same (first) list of transactions for the same account
+                        switch (convert_result2) {
+                            case (#Err(#StaleIndexer( error ))) { 
+                                switch (error.txid) {
+                                    case (null) { Debug.trap("Should have returned #StaleIndexer error with transaction index."); };
+                                    case (?txid) {
+                                        assertTrue( txid == 1234 ); 
 
                                     };
                                 };
