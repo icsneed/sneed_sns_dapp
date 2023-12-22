@@ -24,7 +24,7 @@ import TestUtil "../utils/TestUtil";
 
 module {
 
-
+    // TODO: Check unseen txs
 
     public func test(controller : Principal) : async ActorSpec.Group {
 
@@ -787,6 +787,81 @@ module {
                         switch (convert_result) {
                             case (#Err(#IsSeeder)) { true };
                             case _ { Debug.trap("Should have returned #IsSeeder error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Converting account with unseen old token dApp-to-account transaction should return #StaleIndexer error.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp), (105, 2000000000000, acct, dapp), (110, 500000000000, dapp, acct) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(3));
+                        TestUtil.log_last_seen_old(context, 125); // Simulate not finding the last seen old d2a transaction (125 is not in list from indexer)
+
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+
+                        switch (convert_result) {
+                            case (#Err(#StaleIndexer( error ))) { 
+                                switch (error.txid) {
+                                    case (null) { Debug.trap("Should have returned #StaleIndexer error with transaction index."); };
+                                    case (?txid) {
+                                        assertTrue( txid == 125 ); 
+
+                                    };
+                                };
+                            };
+                            case _ { Debug.trap("Should have returned #StaleIndexer error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Converting account with unseen new token dApp-to-account transaction should return #StaleIndexer error.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp), (105, 2000000000000, acct, dapp) 
+                        // new: (115, 50000000, dapp, account) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(4));
+                        TestUtil.log_last_seen_new(context, 125); // Simulate not finding the last seen old d2a transaction (125 is not in list from indexer)
+
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+
+                        switch (convert_result) {
+                            case (#Err(#StaleIndexer( error ))) { 
+                                switch (error.txid) {
+                                    case (null) { Debug.trap("Should have returned #StaleIndexer error with transaction index."); };
+                                    case (?txid) {
+                                        assertTrue( txid == 125 ); 
+
+                                    };
+                                };
+                            };
+                            case _ { Debug.trap("Should have returned #StaleIndexer error."); };
+                        };
+                    },
+                ),
+                it(
+                    "Converting account with unseen new and old token dApp-to-account transactions should return #StaleIndexer error.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp), (105, 2000000000000, acct, dapp), (110, 500000000000, dapp, acct) 
+                        // new: (115, 50000000, dapp, account) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(5));
+                        TestUtil.log_last_seen_old(context, 325); // Simulate not finding the last seen old d2a transaction (325 is not in list from indexer)
+                        TestUtil.log_last_seen_new(context, 425); // Simulate not finding the last seen old d2a transaction (425 is not in list from indexer)
+
+                        let convert_result = await* Converter.ConvertOldTokens(context, null);
+
+                        switch (convert_result) {
+                            case (#Err(#StaleIndexer( error ))) { 
+                                switch (error.txid) {
+                                    case (null) { Debug.trap("Should have returned #StaleIndexer error with transaction index."); };
+                                    case (?txid) {
+                                        assertTrue( txid == 425 ); 
+
+                                    };
+                                };
+                            };
+                            case _ { Debug.trap("Should have returned #StaleIndexer error."); };
                         };
                     },
                 )

@@ -57,7 +57,6 @@ actor Tests {
         let status = await IC.canister_status({ canister_id = principal });
         return status.settings.controllers;
     };
-
 };
 
 

@@ -471,6 +471,75 @@ module {
                     },
                 ),
                 it(
+                    "When latest seen old transaction index is not in list from indexer, old_latest_send_found should return false and the missing tx index should be in old_latest_send_txid.",
+                    do {
+                        let context = TestUtil.get_context();
+                        let old_amount_d12 = 1000000000000; // 1 token
+                        let old_amount2_d12 = 2000000000000; // 2 tokens
+                        let old_amount3_d12 = 500000000000; // 0.5 tokens
+                        let old_fee_d12 = context.state.persistent.settings.old_fee_d12;
+                        let old_acct_sent_total_d12 = old_amount_d12 + old_amount2_d12;
+                        let old_total_d12 = old_acct_sent_total_d12 - old_amount3_d12 - old_fee_d12; // 2.4999 tokens
+
+                        //amount is inclusive of fee for old token
+                        let tx = TestUtil.get_old_acct_to_dapp_tx(context, 100, old_amount_d12 + old_fee_d12);
+                        let tx2 = TestUtil.get_old_acct_to_dapp_tx(context, 105, old_amount2_d12 + old_fee_d12);
+                        let tx3 = TestUtil.get_old_dapp_to_acct_tx(context, 125, old_amount3_d12 + old_fee_d12);
+                        let transactions : [T.OldTransaction] = [ tx, tx2, tx3 ];
+                        TestUtil.log_last_seen_old(context, 525);
+
+                        let indexedOldAccount = Converter.IndexOldBalance(context, transactions);
+                        TestUtil.print_old_indexed_account(indexedOldAccount);
+                        assertAllTrue([ 
+                            indexedOldAccount.old_balance_d12 == old_total_d12,
+                            indexedOldAccount.old_balance_underflow_d12 == 0,                            
+                            indexedOldAccount.old_sent_acct_to_dapp_d12 == old_acct_sent_total_d12,
+                            indexedOldAccount.old_sent_dapp_to_acct_d12 == old_amount3_d12 + old_fee_d12,
+                            indexedOldAccount.is_burner == false,
+
+                            // Note, while this is false and there is a value in old_latest_send_txid,
+                            // the dApp should not allow conversions for the account! The user will
+                            // have to try again later, giving the indexer a chance to catch up.
+                            indexedOldAccount.old_latest_send_found == false, 
+                            indexedOldAccount.old_latest_send_txid == ?525
+                         ]);
+
+                    },
+                ),
+                it(
+                    "When latest seen new transaction index is not in list from indexer, new_latest_send_found should return false and the missing tx index should be in new_latest_send_txid.",
+                    do {
+                        let context = TestUtil.get_context();
+                        let new_amount_d8 = 100000000; // 1 token
+                        let new_amount2_d8 = 200000000; // 2 tokens
+                        let new_amount3_d8 = 50000000; // 0.5 tokens
+                        let new_acct_sent_total_d8 = new_amount_d8 + new_amount2_d8;
+                        let new_fee_d8 = context.state.persistent.settings.new_fee_d8;
+                        let new_total_d8 = new_acct_sent_total_d8 - new_amount3_d8 - new_fee_d8; // 2.4999 tokens
+
+                        //amount is exclusive of fee for new token
+                        let tx = TestUtil.get_new_acct_to_dapp_tx(context, 100, new_amount_d8);
+                        let tx2 = TestUtil.get_new_acct_to_dapp_tx(context, 105, new_amount2_d8);
+                        let tx3 = TestUtil.get_new_dapp_to_acct_tx(context, 125, new_amount3_d8);
+                        let transactions : [T.NewTransactionWithId] = [ tx, tx2, tx3 ];
+                        TestUtil.log_last_seen_new(context, 525);
+
+                        let indexedNewAccount = Converter.IndexNewBalance(context, transactions);
+                        assertAllTrue([
+                            indexedNewAccount.new_sent_acct_to_dapp_d8 == new_acct_sent_total_d8,
+                            indexedNewAccount.new_sent_dapp_to_acct_d8 == new_amount3_d8 + new_fee_d8,                            
+                            indexedNewAccount.is_seeder == false,
+
+                            // Note, while this is false and there is a value in new_latest_send_txid,
+                            // the dApp should not allow conversions for the account! The user will
+                            // have to try again later, giving the indexer a chance to catch up.
+                            indexedNewAccount.new_latest_send_found == false,
+                            indexedNewAccount.new_latest_send_txid == ?525,
+                         ]);
+
+                    },
+                ),
+                it(
                     "Accounts with subaccount null and subaccount all zeros should match when indexing old tokens.",
                     do {
                         let context = TestUtil.get_context();

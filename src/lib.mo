@@ -627,7 +627,10 @@ module {
 
       // Check if the transaction index matches the most recent OLD token transfer transaction from the dApp to the account (if any).
       // If so we set old_latest_send_found to true.
-      if (old_latest_send_txid != null and tx.index == old_latest_send_txid) { old_latest_send_found := true; };
+      switch (old_latest_send_txid) {
+        case (null) { /* do nothing */ };
+        case (?txid) { if (tx.index == txid) { old_latest_send_found := true; }; };
+      };
 
       // Check if it is a transaction of type "transfer"
       switch(tx.transfer){
@@ -720,7 +723,11 @@ module {
 
       // Check if the transaction index matches the most recent NEW token transfer transaction from the dApp to the account (if any).
       // If so we set new_latest_send_found to true.
-      if (new_latest_send_txid != null and transaction.id == new_latest_send_txid) { new_latest_send_found := true; };
+      //if (new_latest_send_txid != null and transaction.id == new_latest_send_txid) { new_latest_send_found := true; };
+      switch (new_latest_send_txid) {
+        case (null) { /* do nothing */ };
+        case (?txid) { if (transaction.id == txid) { new_latest_send_found := true; }; };
+      };
 
       // Extract the transaction body from the NewTransactionWithId record.
       let tx = transaction.transaction;
