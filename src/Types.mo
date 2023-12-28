@@ -304,15 +304,26 @@ type Settings = {
 };
 
 type LogItem = {
+    name : Text;
     message : Text;
     timestamp : Timestamp;
+    caller : Principal;
+    account : Account;
+    converter : Account;
+
     convert : ?ConvertLogItem;
+    exit : ?ExitLogItem;
 };
 
 type ConvertLogItem = {
     result : TransferResult;
     args : TransferArgs;
     account : IndexedAccount;
+};
+
+type ExitLogItem = {
+    trapped_message : Text;
+    convert_result : ?ConvertResult;
 };
 
 type Mocks = {

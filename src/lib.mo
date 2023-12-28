@@ -204,14 +204,26 @@ module {
   // for that same account again before the specified cooldown period has passed.
   public func convert_account(context : T.ConverterContext) : async* T.ConvertResult {
 
+    log_convert_enter(context);
+
     try {
 
       // Convert from old to new tokens.
-      await* ConvertAccount(context);
+      let result = await* ConvertAccount(context);
+
+      let waste = log_convert_exit(context, result, "");
+
+      result;
 
     } catch e {
 
-      return #Err(#ExternalCanisterError({ message = Error.message(e) }));
+      let message = Error.message(e);
+
+      let result : T.ConvertResult = #Err(#ExternalCanisterError({ message = message }));
+
+      let waste = log_convert_exit(context, result, message);
+
+      result;
 
     };
     
@@ -325,23 +337,22 @@ module {
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
     if (not IsActive(context)) { return #Err(#NotActive); };
 
+    // Extract account from context
+    let account = context.account;
+
     // Ensure account is valid
-    if (not ValidateAccount(context.account)) { return #Err(#InvalidAccount); };
+    if (not ValidateAccount(account)) { return #Err(#InvalidAccount); };
 
     // Ensure the account is not on cooldown.
-    if (OnCooldown(context, context.account.owner)) {
+    if (OnCooldown(context, account.owner)) {
       return #Err(#OnCooldown { 
-        since = CooldownSince(context, context.account.owner); 
-        remaining = CooldownRemaining(context, context.account.owner); })
+        since = CooldownSince(context, account.owner); 
+        remaining = CooldownRemaining(context, account.owner); })
     };
 
     // The account was not on cooldown, so we start 
     // the cooldown timer and proceed with the conversion
-    context.state.ephemeral.cooldowns.put(context.account.owner, Time.now());
-
-
-    // Extract account from context
-    let account = context.account;
+    context.state.ephemeral.cooldowns.put(account.owner, Time.now());
 
     // Extract state from context
     let state = context.state;
@@ -886,15 +897,40 @@ module {
 
   };
 
+  public func log_convert_enter(context : T.ConverterContext) : () {
+    log_convert(context, "convert_account", "Enter", null, null)
+  };
+
   public func log_convert_call(context : T.ConverterContext, result : T.TransferResult, args : T.TransferArgs, account : T.IndexedAccount) : () {
+    let convert : T.ConvertLogItem = {
+      result = result;
+      args = args;
+      account = account;
+    };
+
+    log_convert(context, "ConvertAccount", "Complete", ?convert, null)
+  };
+
+  public func log_convert_exit(context : T.ConverterContext, result : T.ConvertResult, trapped_message : Text) : () {
+    let exit : T.ExitLogItem = {
+      convert_result = ?result;
+      trapped_message = trapped_message;
+    };
+
+    log_convert(context, "convert_account", "Exit", null, ?exit)
+  };
+
+
+  private func log_convert(context : T.ConverterContext, name : Text, message : Text, convert : ?T.ConvertLogItem, exit : ?T.ExitLogItem) : () {
     let logItem : T.LogItem = {
-      message = "Conversion";
+      name = name;
+      message = message;
       timestamp = Nat64.fromNat(Int.abs(Time.now()));
-      convert = ?{
-        result = result;
-        args = args;
-        account = account;
-      }
+      caller = context.caller;
+      account = context.account;
+      converter = context.converter;
+      convert = convert;
+      exit = exit;
     };
 
     context.state.ephemeral.log.add(logItem);

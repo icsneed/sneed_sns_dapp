@@ -257,10 +257,15 @@ module {
         };
     };
     
-    public func is_ok_convert_result(result : T.ConvertResult) : Bool {
+    public func is_ok_convert_result(result : ?T.ConvertResult) : Bool {
         switch (result) {
-            case (#Err(err)) { false };
-            case (#Ok(tx_index2)) { true };
+            case (null) { false };
+            case (?res) { 
+                switch (res) {
+                    case (#Err(err)) { false };
+                    case (#Ok(tx_index2)) { true };
+                };                
+             };
         };
     };
 
@@ -272,16 +277,17 @@ module {
         context.state.ephemeral.new_latest_sent_txids.put(context.account.owner, index);
     };
 
-    public func must_get_latest_log_item(log : [T.LogItem]) : T.LogItem {
-        switch (get_latest_log_item(log)) {
+    public func must_get_latest_log_item(log : [T.LogItem], offset : Nat) : T.LogItem {
+        switch (get_latest_log_item(log, offset)) {
             case (null) { Debug.trap("Expected log item"); };
             case (?item) { item; };
         };
     };
 
-    public func get_latest_log_item(log : [T.LogItem]) : ?T.LogItem {
+    public func get_latest_log_item(log : [T.LogItem], offset : Nat) : ?T.LogItem {
         if (log.size() < 1) { return null; };
-        ?log.get(log.size() -1);
+        if (log.size() < offset) { return null; };
+        ?log.get(log.size() - 1 - offset);
     };
 
     public func must_get_convert_log_item(log_item : ?T.LogItem) : T.ConvertLogItem {
@@ -296,6 +302,22 @@ module {
             case (null) { null; };
             case (?item) {
                 item.convert;
+            };
+        };
+    };
+
+    public func must_get_exit_log_item(log_item : ?T.LogItem) : T.ExitLogItem {
+        switch (get_exit_log_item(log_item)) {
+            case (null) { Debug.trap("Expected exit log item"); };
+            case (?exit) { exit; };
+        };
+    };
+
+    public func get_exit_log_item(log_item : ?T.LogItem) : ?T.ExitLogItem {
+        switch (log_item) {
+            case (null) { null; };
+            case (?item) {
+                item.exit;
             };
         };
     };

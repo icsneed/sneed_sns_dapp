@@ -42,7 +42,7 @@ module {
         } = ActorSpec;
 
         return describe(
-            "SneedConverter dApp Indexing Tests",
+            "SneedConverter dApp Conversion Tests",
             [
                 it(
                     "Converting account with no transactions should result in #InsufficientFunds with zero balance.",
@@ -74,15 +74,26 @@ module {
                             case (#Err(err)) { Debug.trap("Failed"); };
                             case (#Ok(tx_index)) {
 
-                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let log_item_enter = TestUtil.must_get_latest_log_item(Converter.get_log(context), 2);
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
+                                let log_item_exit = TestUtil.must_get_latest_log_item(Converter.get_log(context), 0);
                                 let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
+                                let exit_log_item = TestUtil.must_get_exit_log_item(?log_item_exit);
                                 let indexedAccount = convert_log_item.account;
 
                                 assertAllTrue([
 
                                     tx_index == 1234,
                                     TestUtil.verify_convert_log_item_invariants(context, convert_log_item),
-                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    TestUtil.is_ok_convert_result(?convert_log_item.result),
+                                    log_item_enter.name == "convert_account",
+                                    log_item.name == "ConvertAccount",
+                                    log_item_exit.name == "convert_account",
+                                    log_item_enter.message == "Enter",
+                                    log_item.message == "Complete",
+                                    log_item_exit.message == "Exit",
+                                    TestUtil.is_ok_convert_result(exit_log_item.convert_result),
+                                    exit_log_item.trapped_message == "",
                                     convert_log_item.args.amount == 99989000,
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
@@ -132,7 +143,7 @@ module {
                             case (#Err(err)) { Debug.trap("Failed"); };
                             case (#Ok(tx_index)) {
 
-                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
                                 let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
                                 let indexedAccount = convert_log_item.account;
 
@@ -140,7 +151,7 @@ module {
 
                                     tx_index == 1234,
                                     TestUtil.verify_convert_log_item_invariants(context, convert_log_item),
-                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    TestUtil.is_ok_convert_result(?convert_log_item.result),
                                     convert_log_item.args.amount == 299979000,
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
@@ -194,7 +205,7 @@ module {
                             case (#Err(err)) { Debug.trap("Failed"); };
                             case (#Ok(tx_index)) {
 
-                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
                                 let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
                                 let indexedAccount = convert_log_item.account;
 
@@ -202,7 +213,7 @@ module {
 
                                     tx_index == 1234,
                                     TestUtil.verify_convert_log_item_invariants(context, convert_log_item),
-                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    TestUtil.is_ok_convert_result(?convert_log_item.result),
                                     convert_log_item.args.amount == 249979000,
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
@@ -259,7 +270,7 @@ module {
                             case (#Err(err)) { Debug.trap("Failed"); };
                             case (#Ok(tx_index)) {
 
-                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
                                 let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
                                 let indexedAccount = convert_log_item.account;
 
@@ -267,7 +278,7 @@ module {
 
                                     tx_index == 1234,
                                     TestUtil.verify_convert_log_item_invariants(context, convert_log_item),
-                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    TestUtil.is_ok_convert_result(?convert_log_item.result),
                                     convert_log_item.args.amount == 249978000,
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
@@ -332,7 +343,7 @@ module {
                             case (#Err(err)) { Debug.trap("Failed"); };
                             case (#Ok(tx_index)) {
 
-                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
                                 let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
                                 let indexedAccount = convert_log_item.account;
 
@@ -340,7 +351,7 @@ module {
 
                                     tx_index == 1234,
                                     TestUtil.verify_convert_log_item_invariants(context, convert_log_item),
-                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    TestUtil.is_ok_convert_result(?convert_log_item.result),
                                     convert_log_item.args.amount == 199978000,
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
@@ -415,7 +426,7 @@ module {
                             case (#Err(err)) { Debug.trap("Failed"); };
                             case (#Ok(tx_index)) {
 
-                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
                                 let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
                                 let indexedAccount = convert_log_item.account;
 
@@ -423,7 +434,7 @@ module {
 
                                     tx_index == 1234,
                                     TestUtil.verify_convert_log_item_invariants(context, convert_log_item),
-                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    TestUtil.is_ok_convert_result(?convert_log_item.result),
                                     convert_log_item.args.amount == 224978000,
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
@@ -490,7 +501,7 @@ module {
                             case (#Err(err)) { Debug.trap("Failed"); };
                             case (#Ok(tx_index)) {
 
-                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context));
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
                                 let convert_log_item = TestUtil.must_get_convert_log_item(?log_item);
                                 let indexedAccount = convert_log_item.account;
 
@@ -498,7 +509,7 @@ module {
 
                                     tx_index == 1234,
                                     TestUtil.verify_convert_log_item_invariants(context, convert_log_item),
-                                    TestUtil.is_ok_convert_result(convert_log_item.result),
+                                    TestUtil.is_ok_convert_result(?convert_log_item.result),
                                     convert_log_item.args.amount == 123445789,
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
@@ -970,7 +981,24 @@ module {
                         let convert_result = await* Converter.convert_account(context);
                         
                         switch (convert_result) {
-                            case (#Err(#ExternalCanisterError({ message }))) { assertTrue( message == "IC0503: Canister bw4dl-smaaa-aaaaa-qaacq-cai trapped explicitly: Old indexer canister mock trapped." ); };
+                            case (#Err(#ExternalCanisterError({ message }))) { 
+                                
+                                let log_item_enter = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
+                                let log_item_exit = TestUtil.must_get_latest_log_item(Converter.get_log(context), 0);
+                                let exit_log_item = TestUtil.must_get_exit_log_item(?log_item_exit);
+                                let expected_msg = "IC0503: Canister bw4dl-smaaa-aaaaa-qaacq-cai trapped explicitly: Old indexer canister mock trapped.";
+
+                                assertAllTrue([ 
+                                    message == expected_msg, 
+                                    log_item_enter.name == "convert_account",
+                                    log_item_exit.name == "convert_account",
+                                    log_item_enter.message == "Enter",
+                                    log_item_exit.message == "Exit",
+                                    log_item_enter.convert == null,
+                                    log_item_enter.exit == null,
+                                    exit_log_item.trapped_message == expected_msg
+                                ]); 
+                            };
                             case _ { false; };
                         };
                     },

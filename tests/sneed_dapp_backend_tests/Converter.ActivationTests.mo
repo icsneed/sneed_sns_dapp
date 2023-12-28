@@ -39,7 +39,7 @@ module {
                         let context = TestUtil.get_context();
                         switch (await* Converter.get_account(context)) {
                             case (#Err(#NotActive)) { true };
-                            case (#Ok(account)) { false; };
+                            case _ { false; };
                         };
 
                     },

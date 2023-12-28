@@ -1,6 +1,8 @@
 import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
 
+import Converter "../../src/";
+
 import T "../../src/Types";
 import TestUtil "../utils/TestUtil";
 
