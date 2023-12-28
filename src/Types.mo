@@ -312,6 +312,7 @@ type LogItem = {
     converter : Account;
 
     convert : ?ConvertLogItem;
+    burn : ?BurnLogItem;
     exit : ?ExitLogItem;
 };
 
@@ -321,9 +322,15 @@ type ConvertLogItem = {
     account : IndexedAccount;
 };
 
+type BurnLogItem = {
+    result : TransferResult;
+    args : BurnArgs;
+};
+
 type ExitLogItem = {
     trapped_message : Text;
     convert_result : ?ConvertResult;
+    burn_result : ?BurnOldTokensResult;
 };
 
 type Mocks = {

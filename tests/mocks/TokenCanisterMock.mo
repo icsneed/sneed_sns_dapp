@@ -25,6 +25,11 @@ shared actor class TokenMock() : async T.TokenInterface = {
     };
 
     public func burn(args : T.BurnArgs) : async T.TransferResult {
+
+        if (args.amount == 42000000000000) {
+            Debug.trap("Old ledger canister mock trapped.");            
+        };
+
         #Ok(5678)
     };
 

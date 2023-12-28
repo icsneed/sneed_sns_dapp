@@ -26,8 +26,6 @@ import TestUtil "../utils/TestUtil";
 
 module {
 
-    // TODO: Check unseen txs
-
     public func test(controller : Principal) : async ActorSpec.Group {
 
         let {
@@ -988,6 +986,7 @@ module {
                                 let exit_log_item = TestUtil.must_get_exit_log_item(?log_item_exit);
                                 let expected_msg = "IC0503: Canister bw4dl-smaaa-aaaaa-qaacq-cai trapped explicitly: Old indexer canister mock trapped.";
 
+                                // The log should only contain the enter and exit messages, not the ConvertAccount Complete message
                                 assertAllTrue([ 
                                     message == expected_msg, 
                                     log_item_enter.name == "convert_account",

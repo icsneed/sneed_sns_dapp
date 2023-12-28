@@ -6,6 +6,7 @@ import UnitTests "sneed_dapp_backend_tests/Converter.UnitTests";
 import ActivationTests "sneed_dapp_backend_tests/Converter.ActivationTests";
 import IndexingTests "sneed_dapp_backend_tests/Converter.IndexingTests";
 import ConversionTests "sneed_dapp_backend_tests/Converter.ConversionTests";
+import BurnTests "sneed_dapp_backend_tests/Converter.BurnTests";
 
 import ActorSpec "/utils/ActorSpec";
 import TestUtil "/utils/TestUtil";
@@ -17,7 +18,8 @@ actor Tests {
         UnitTests.test,
         ActivationTests.test,
         IndexingTests.test,
-        ConversionTests.test
+        ConversionTests.test,
+        BurnTests.test
     ];
 
     public func run_tests() : async () {

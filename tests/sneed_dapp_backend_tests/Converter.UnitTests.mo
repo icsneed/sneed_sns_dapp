@@ -782,8 +782,6 @@ module {
                         not is_valid;
                     }
                 )
-
-                // TODO: Test logging
             ]
         );
     };

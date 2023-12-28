@@ -211,7 +211,7 @@ module {
       // Convert from old to new tokens.
       let result = await* ConvertAccount(context);
 
-      let waste = log_convert_exit(context, result, "");
+      log_convert_exit(context, result, "");
 
       result;
 
@@ -221,7 +221,7 @@ module {
 
       let result : T.ConvertResult = #Err(#ExternalCanisterError({ message = message }));
 
-      let waste = log_convert_exit(context, result, message);
+      log_convert_exit(context, result, message);
 
       result;
 
@@ -235,14 +235,26 @@ module {
   //     even when the OLD tokens on the dApp have been burned.
   public func burn_old_tokens(context : T.ConverterContext, amount : T.Balance) : async* T.BurnOldTokensResult {
 
+    log_burn_enter(context);
+
     try {
 
       //Burn old tokens
-      await* BurnOldTokens(context, amount);
+      let result = await* BurnOldTokens(context, amount);
+
+      log_burn_exit(context, result, "");
+
+      result;
 
     } catch e {
 
-      return #Err(#ExternalCanisterError({ message = Error.message(e) }));
+      let message = Error.message(e);
+
+      let result = #Err(#ExternalCanisterError({ message = message }));
+
+      log_burn_exit(context, result, message);
+
+      result;
 
     };
     
@@ -464,7 +476,7 @@ module {
     // Ensure only controllers can call this function
     assert Principal.isController(context.caller);
 
-    // TODO: Ensure the caller is not on cooldown.
+    // Ensure the caller is not on cooldown.
     if (OnCooldown(context, context.caller)) {
       return #Err(#OnCooldown { 
         since = CooldownSince(context, context.caller); 
@@ -498,7 +510,13 @@ module {
     };
 
     // burn the old tokens
-    await state.persistent.old_token_canister.burn(burn_args);
+    let burn_result = await state.persistent.old_token_canister.burn(burn_args);
+
+    // Log the transaction attempt
+    log_burn_call(context, burn_result, burn_args);
+
+    // Return the result of the burn transactions
+    burn_result;
 
   };
 
@@ -914,6 +932,7 @@ module {
   public func log_convert_exit(context : T.ConverterContext, result : T.ConvertResult, trapped_message : Text) : () {
     let exit : T.ExitLogItem = {
       convert_result = ?result;
+      burn_result = null;
       trapped_message = trapped_message;
     };
 
@@ -930,10 +949,50 @@ module {
       account = context.account;
       converter = context.converter;
       convert = convert;
+      burn = null;
       exit = exit;
     };
 
     context.state.ephemeral.log.add(logItem);
   };
 
+  public func log_burn_enter(context : T.ConverterContext) : () {
+    log_burn(context, "burn_old_tokens", "Enter", null, null)
+  };
+
+  public func log_burn_call(context : T.ConverterContext, result : T.TransferResult, args : T.BurnArgs) : () {
+    let burn : T.BurnLogItem = {
+      result = result;
+      args = args;
+    };
+
+    log_burn(context, "BurnOldTokens", "Complete", ?burn, null)
+  };
+
+  public func log_burn_exit(context : T.ConverterContext, result : T.BurnOldTokensResult, trapped_message : Text) : () {
+    let exit : T.ExitLogItem = {
+      convert_result = null;
+      burn_result = ?result;
+      trapped_message = trapped_message;
+    };
+
+    log_burn(context, "burn_old_tokens", "Exit", null, ?exit)
+  };
+
+
+  private func log_burn(context : T.ConverterContext, name : Text, message : Text, burn : ?T.BurnLogItem, exit : ?T.ExitLogItem) : () {
+    let logItem : T.LogItem = {
+      name = name;
+      message = message;
+      timestamp = Nat64.fromNat(Int.abs(Time.now()));
+      caller = context.caller;
+      account = context.account;
+      converter = context.converter;
+      convert = null;
+      burn = burn;
+      exit = exit;
+    };
+
+    context.state.ephemeral.log.add(logItem);
+  };
 };

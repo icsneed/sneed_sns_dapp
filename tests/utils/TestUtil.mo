@@ -263,7 +263,19 @@ module {
             case (?res) { 
                 switch (res) {
                     case (#Err(err)) { false };
-                    case (#Ok(tx_index2)) { true };
+                    case (#Ok(tx_index)) { tx_index == 1234; };
+                };                
+             };
+        };
+    };
+    
+    public func is_ok_burn_result(result : ?T.BurnOldTokensResult) : Bool {
+        switch (result) {
+            case (null) { false };
+            case (?res) { 
+                switch (res) {
+                    case (#Err(err)) { false };
+                    case (#Ok(tx_index)) { tx_index == 5678; };
                 };                
              };
         };
@@ -302,6 +314,22 @@ module {
             case (null) { null; };
             case (?item) {
                 item.convert;
+            };
+        };
+    };
+
+    public func must_get_burn_log_item(log_item : ?T.LogItem) : T.BurnLogItem {
+        switch (get_burn_log_item(log_item)) {
+            case (null) { Debug.trap("Expected burn log item"); };
+            case (?burn) { burn; };
+        };
+    };
+
+    public func get_burn_log_item(log_item : ?T.LogItem) : ?T.BurnLogItem {
+        switch (log_item) {
+            case (null) { null; };
+            case (?item) {
+                item.burn;
             };
         };
     };
