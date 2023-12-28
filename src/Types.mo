@@ -213,6 +213,7 @@ type ConvertError = TransferError or {
     #IsSeeder;
     #IsBurner;
     #NotActive;
+    #NotController;
     #ConversionsNotAllowed;
     #IndexUnderflow : { 
         new_total_balance_underflow_d8 : Balance;

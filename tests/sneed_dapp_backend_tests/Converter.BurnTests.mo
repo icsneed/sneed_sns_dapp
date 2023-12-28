@@ -53,7 +53,7 @@ module {
                         let burn_result = await* Converter.burn_old_tokens(context, amount1);
 
                         switch (burn_result) {
-                            case (#Err(err)) { Debug.print(debug_show(err)); Debug.trap("Failed:" # debug_show(err)); };
+                            case (#Err(err)) { Debug.trap("Failed:" # debug_show(err)); };
                             case (#Ok(tx_index)) {
 
                                 let log_item_enter = TestUtil.must_get_latest_log_item(Converter.get_log(context), 2);
@@ -79,6 +79,70 @@ module {
                                     burn_log_item.args.from_subaccount == null,
                                     burn_log_item.args.memo == null,
                                     burn_log_item.args.created_at_time == null,
+
+                                ]);
+                            };
+                        };
+                    },
+                ),
+                it(
+                    "Calling burn with non-controller caller should result in #NotController error.",
+                    do {
+
+                        let account = TestUtil.get_test_account(1);
+                        let context = TestUtil.get_caller_context(account.owner);
+                        let burn_result = await* Converter.burn_old_tokens(context, 100000000);
+
+                        switch (burn_result) {
+                            case (#Err(#NotController)) { true; };
+                            case _ { false; };
+                        };
+                    },
+                ),
+                it(
+                    "Calling burn twice inside the cooldown period should result in an #OnCooldown error.",
+                    do {
+
+                        let context = TestUtil.get_context_with_mocks(controller);
+
+                        let burn_result = await* Converter.burn_old_tokens(context, 1000000000000);
+                        let burn_result2 = await* Converter.burn_old_tokens(context, 2000000000000);
+
+                        switch (burn_result2) {
+                            case (#Err(#OnCooldown( error ))) { 
+                                assertAllTrue([ 
+                                    error.since > 0,
+                                    error.remaining > 0 
+                                ]);
+                            };
+                            case _ { false; };
+                        };
+                    },
+                ),
+                it(
+                    "Calling burn a second time outside the cooldown period should not result in an #OnCooldown error.",
+                    do {
+
+                        let context = TestUtil.get_context_with_mocks(controller);
+
+                        let burn_result = await* Converter.burn_old_tokens(context, 1000000000000);
+
+                        let since = Converter.CooldownSince(context, context.caller);
+                        context.state.ephemeral.cooldowns.put(context.caller, since 
+                                                                                - (context.state.persistent.settings.cooldown_ns + 1));
+
+                        let burn_result2 = await* Converter.burn_old_tokens(context, 2000000000000);
+                        switch (burn_result2) {
+                            case (#Err(err)) { Debug.trap("Failed:" # debug_show(err)); };
+                            case (#Ok(tx_index)) {
+
+                                let log_item = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
+                                let burn_log_item = TestUtil.must_get_burn_log_item(?log_item);
+
+                                assertAllTrue([
+
+                                    tx_index == 5678,
+                                    TestUtil.is_ok_burn_result(?burn_log_item.result),
 
                                 ]);
                             };

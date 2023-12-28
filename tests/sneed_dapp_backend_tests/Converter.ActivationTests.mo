@@ -36,7 +36,7 @@ module {
                     "Should not be able to call get_account before activation.",
                     do {
 
-                        let context = TestUtil.get_context();
+                        let context = TestUtil.get_caller_context(controller);
                         switch (await* Converter.get_account(context)) {
                             case (#Err(#NotActive)) { true };
                             case _ { false; };
@@ -48,7 +48,7 @@ module {
                     "Should not be able to call convert_account before activation.",
                     do {
 
-                        let context = TestUtil.get_context();
+                        let context = TestUtil.get_caller_context(controller);
                         switch (await* Converter.convert_account(context)) {
                             case (#Err(#NotActive)) { true };
                             case _ { false; };
@@ -60,7 +60,7 @@ module {
                     "Should not be able to call burn_old_tokens before activation.",
                     do {
 
-                        let context = TestUtil.get_context();
+                        let context = TestUtil.get_caller_context(controller);
                         switch (await* Converter.burn_old_tokens(context, 1000000000000)) {
                             case (#Err(#NotActive)) { true };
                             case _ { false; };

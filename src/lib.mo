@@ -270,7 +270,7 @@ module {
   public func set_settings(context : T.ConverterContext, new_settings : T.Settings) : Bool {
 
     // Ensure only controllers can call this function
-    assert Principal.isController(context.caller);
+    if (not Principal.isController(context.caller)) { return false; };
 
     context.state.persistent.settings := new_settings;
 
@@ -301,15 +301,17 @@ module {
     new_indexer_canister_id : Text) : () {
 
     // Ensure only controllers can call this function
-    assert Principal.isController(context.caller);
+    if (Principal.isController(context.caller)) { 
 
-    // Extract state from context
-    let state = context.state;
+      // Extract state from context
+      let state = context.state;
 
-    state.persistent.old_token_canister := actor (old_token_canister_id);
-    state.persistent.old_indexer_canister := actor (old_indexer_canister_id);
-    state.persistent.new_token_canister := actor (new_token_canister_id);
-    state.persistent.new_indexer_canister := actor (new_indexer_canister_id);
+      state.persistent.old_token_canister := actor (old_token_canister_id);
+      state.persistent.old_indexer_canister := actor (old_indexer_canister_id);
+      state.persistent.new_token_canister := actor (new_token_canister_id);
+      state.persistent.new_indexer_canister := actor (new_indexer_canister_id);
+
+    };
   };
 
 /// PRIVATE FUNCTIONS ///
@@ -469,12 +471,12 @@ module {
   public func BurnOldTokens(context : T.ConverterContext, amount_d12: T.Balance) : async* T.BurnOldTokensResult {
 
     // Initial Validation
+    
+    // Ensure only controllers can call this function
+    if (not Principal.isController(context.caller)) { return #Err(#NotController); };
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
     if (not IsActive(context)) { return #Err(#NotActive); };
-    
-    // Ensure only controllers can call this function
-    assert Principal.isController(context.caller);
 
     // Ensure the caller is not on cooldown.
     if (OnCooldown(context, context.caller)) {
@@ -488,7 +490,6 @@ module {
     // This prevents an accidental double burn 
     // (from accidentally doubly entered DAO propositions to burn.)
     context.state.ephemeral.cooldowns.put(context.caller, Time.now());
-
 
     // Extract state from context
     let state = context.state;
@@ -909,7 +910,7 @@ module {
   public func get_log(context : T.ConverterContext) : [T.LogItem] {
     
     // Ensure only controllers can call this function
-    //assert Principal.isController(context.caller);
+    //if (not Principal.isController(context.caller)) { return #Err(#NotController); };
 
     Buffer.toArray(context.state.ephemeral.log);
 
