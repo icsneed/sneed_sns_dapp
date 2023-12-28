@@ -272,7 +272,14 @@ module {
     // Ensure only controllers can call this function
     if (not Principal.isController(context.caller)) { return false; };
 
+    // Store away the old settings in a local variable for logging
+    let old_settings = context.state.persistent.settings;
+
+    // Update the settings
     context.state.persistent.settings := new_settings;
+
+    // Log the call
+    log_set_settings_call(context, old_settings, new_settings);
 
     true;
   };
@@ -295,23 +302,40 @@ module {
   // This method can only be called by the dApps controllers.
   public func set_canister_ids(
     context : T.ConverterContext, 
-    old_token_canister_id : Text, 
-    old_indexer_canister_id : Text, 
-    new_token_canister_id : Text, 
-    new_indexer_canister_id : Text) : () {
+    old_token_canister_id : Principal, 
+    old_indexer_canister_id : Principal, 
+    new_token_canister_id : Principal, 
+    new_indexer_canister_id : Principal) : Bool {
 
     // Ensure only controllers can call this function
-    if (Principal.isController(context.caller)) { 
+    if (not Principal.isController(context.caller)) { return false; };
 
-      // Extract state from context
-      let state = context.state;
+    // Extract state from context
+    let persistent = context.state.persistent;
 
-      state.persistent.old_token_canister := actor (old_token_canister_id);
-      state.persistent.old_indexer_canister := actor (old_indexer_canister_id);
-      state.persistent.new_token_canister := actor (new_token_canister_id);
-      state.persistent.new_indexer_canister := actor (new_indexer_canister_id);
-
+    let old_canisters : T.CanisterIds = {
+      old_token_canister_id = Principal.fromActor(persistent.old_token_canister);
+      old_indexer_canister_id = Principal.fromActor(persistent.old_indexer_canister);
+      new_token_canister_id = Principal.fromActor(persistent.new_token_canister);
+      new_indexer_canister_id = Principal.fromActor(persistent.new_indexer_canister);
     };
+
+    persistent.old_token_canister := actor (Principal.toText(old_token_canister_id));
+    persistent.old_indexer_canister := actor (Principal.toText(old_indexer_canister_id));
+    persistent.new_token_canister := actor (Principal.toText(new_token_canister_id));
+    persistent.new_indexer_canister := actor (Principal.toText(new_indexer_canister_id));
+
+    let new_canisters : T.CanisterIds = {
+      old_token_canister_id = old_token_canister_id;
+      old_indexer_canister_id = old_indexer_canister_id;
+      new_token_canister_id = new_token_canister_id;
+      new_indexer_canister_id = new_indexer_canister_id;
+    };
+
+    // Log the call
+    log_set_canisters_call(context, old_canisters, new_canisters);
+
+    true;
   };
 
 /// PRIVATE FUNCTIONS ///
@@ -951,6 +975,8 @@ module {
       converter = context.converter;
       convert = convert;
       burn = null;
+      set_settings = null;
+      set_canisters = null;
       exit = exit;
     };
 
@@ -980,7 +1006,6 @@ module {
     log_burn(context, "burn_old_tokens", "Exit", null, ?exit)
   };
 
-
   private func log_burn(context : T.ConverterContext, name : Text, message : Text, burn : ?T.BurnLogItem, exit : ?T.ExitLogItem) : () {
     let logItem : T.LogItem = {
       name = name;
@@ -991,9 +1016,54 @@ module {
       converter = context.converter;
       convert = null;
       burn = burn;
+      set_settings = null;
+      set_canisters = null;
       exit = exit;
     };
 
     context.state.ephemeral.log.add(logItem);
   };
+
+  private func log_set_settings_call(context : T.ConverterContext, old_settings : T.Settings, new_settings : T.Settings) : () {
+    let logItem : T.LogItem = {
+      name = "set_settings";
+      message = "Complete";
+      timestamp = Nat64.fromNat(Int.abs(Time.now()));
+      caller = context.caller;
+      account = context.account;
+      converter = context.converter;
+      convert = null;
+      burn = null;
+      set_settings = ?{
+        old_settings = old_settings;
+        new_settings = new_settings;
+      };
+      set_canisters = null;
+      exit = null;
+    };
+
+    context.state.ephemeral.log.add(logItem);
+  };
+
+  private func log_set_canisters_call(context : T.ConverterContext, old_canisters : T.CanisterIds, new_canisters : T.CanisterIds) : () {
+    let logItem : T.LogItem = {
+      name = "set_canister_ids";
+      message = "Complete";
+      timestamp = Nat64.fromNat(Int.abs(Time.now()));
+      caller = context.caller;
+      account = context.account;
+      converter = context.converter;
+      convert = null;
+      burn = null;
+      set_settings = null;
+      set_canisters = ?{
+        old_canisters = old_canisters;
+        new_canisters = new_canisters;
+      };
+      exit = null;
+    };
+
+    context.state.ephemeral.log.add(logItem);
+  };
+
 };

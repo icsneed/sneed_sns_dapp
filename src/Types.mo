@@ -276,12 +276,14 @@ type IndexNewBalanceResult = {
     new_latest_send_txid : ?TxIndex;
 };
 
-type GetCanisterIdsResult = {
+type CanisterIds = {
     new_token_canister_id : Principal;
     new_indexer_canister_id : Principal;
     old_token_canister_id : Principal;
     old_indexer_canister_id : Principal;
 };
+
+type GetCanisterIdsResult = CanisterIds;
 
 type BurnOldTokensResult = {
     #Ok : TxIndex;
@@ -314,6 +316,8 @@ type LogItem = {
 
     convert : ?ConvertLogItem;
     burn : ?BurnLogItem;
+    set_settings : ?SetSettingsLogItem;
+    set_canisters : ?SetCanistersLogItem;
     exit : ?ExitLogItem;
 };
 
@@ -326,6 +330,16 @@ type ConvertLogItem = {
 type BurnLogItem = {
     result : TransferResult;
     args : BurnArgs;
+};
+
+type SetSettingsLogItem = {
+    old_settings : Settings;
+    new_settings : Settings;
+};
+
+type SetCanistersLogItem = {
+    old_canisters : CanisterIds;
+    new_canisters : CanisterIds;
 };
 
 type ExitLogItem = {

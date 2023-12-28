@@ -127,24 +127,24 @@ module {
     public func get_caller_active_context(caller : Principal) : T.ConverterContext {
 
         let context = get_caller_context(caller);
-        Converter.set_canister_ids(
+        let waste = Converter.set_canister_ids(
             context, 
-            "czysu-eaaaa-aaaag-qcvdq-cai", 
-            "czysu-eaaaa-aaaag-qcvdq-cai", 
-            "czysu-eaaaa-aaaag-qcvdq-cai", 
-            "czysu-eaaaa-aaaag-qcvdq-cai");
+            Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+            Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+            Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+            Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"));
 
         return context;
     };
 
     private func set_mocks(context : T.ConverterContext) {
 
-        Converter.set_canister_ids(
+        let waste = Converter.set_canister_ids(
             context, 
-            "b77ix-eeaaa-aaaaa-qaada-cai", 
-            "bw4dl-smaaa-aaaaa-qaacq-cai", 
-            "br5f7-7uaaa-aaaaa-qaaca-cai", 
-            "be2us-64aaa-aaaaa-qaabq-cai");
+            Principal.fromText("b77ix-eeaaa-aaaaa-qaada-cai"), 
+            Principal.fromText("bw4dl-smaaa-aaaaa-qaacq-cai"), 
+            Principal.fromText("br5f7-7uaaa-aaaaa-qaaca-cai"), 
+            Principal.fromText("be2us-64aaa-aaaaa-qaabq-cai"));
 
     };
 
@@ -330,6 +330,38 @@ module {
             case (null) { null; };
             case (?item) {
                 item.burn;
+            };
+        };
+    };
+
+    public func must_get_set_settings_log_item(log_item : ?T.LogItem) : T.SetSettingsLogItem {
+        switch (get_set_settings_log_item(log_item)) {
+            case (null) { Debug.trap("Expected set_settings log item"); };
+            case (?set_settings) { set_settings; };
+        };
+    };
+
+    public func get_set_settings_log_item(log_item : ?T.LogItem) : ?T.SetSettingsLogItem {
+        switch (log_item) {
+            case (null) { null; };
+            case (?item) {
+                item.set_settings;
+            };
+        };
+    };
+
+    public func must_get_set_canisters_log_item(log_item : ?T.LogItem) : T.SetCanistersLogItem {
+        switch (get_set_canisters_log_item(log_item)) {
+            case (null) { Debug.trap("Expected set_canister_ids log item"); };
+            case (?set_canisters) { set_canisters; };
+        };
+    };
+
+    public func get_set_canisters_log_item(log_item : ?T.LogItem) : ?T.SetCanistersLogItem {
+        switch (log_item) {
+            case (null) { null; };
+            case (?item) {
+                item.set_canisters;
             };
         };
     };

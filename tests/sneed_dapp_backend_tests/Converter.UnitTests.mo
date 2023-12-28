@@ -666,10 +666,15 @@ module {
                         let context = TestUtil.get_caller_context(controller);
                         let old_canister_ids = Converter.get_canister_ids(context);
 
-                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "duww2-liaaa-aaaag-qcvea-cai", "cpi23-5qaaa-aaaag-qcs5a-cai", "ahw5u-keaaa-aaaaa-qaaha-cai");
+                        let ok = Converter.set_canister_ids(context, 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("duww2-liaaa-aaaag-qcvea-cai"), 
+                                                    Principal.fromText("cpi23-5qaaa-aaaag-qcs5a-cai"), 
+                                                    Principal.fromText("ahw5u-keaaa-aaaaa-qaaha-cai"));
                         let new_canister_ids = Converter.get_canister_ids(context);
 
                         assertAllTrue([ 
+                            ok,
                             Principal.isAnonymous(old_canister_ids.old_token_canister_id),
                             Principal.isAnonymous(old_canister_ids.old_indexer_canister_id),
                             Principal.isAnonymous(old_canister_ids.new_token_canister_id),
@@ -686,16 +691,36 @@ module {
                     do {
                         let context = TestUtil.get_caller_context(controller);
                         let active0 = Converter.IsActive(context);
-                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae", "2vxsx-fae", "2vxsx-fae");
+                        let ok0 = Converter.set_canister_ids(context, 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("2vxsx-fae"), 
+                                                    Principal.fromText("2vxsx-fae"), 
+                                                    Principal.fromText("2vxsx-fae"));
                         let active1 = Converter.IsActive(context);
-                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae", "2vxsx-fae");
+                        let ok1 = Converter.set_canister_ids(context, 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("2vxsx-fae"), 
+                                                    Principal.fromText("2vxsx-fae"));
                         let active2 = Converter.IsActive(context);
-                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "2vxsx-fae");
+                        let ok2 = Converter.set_canister_ids(context, 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("2vxsx-fae"));
                         let active3 = Converter.IsActive(context);
-                        Converter.set_canister_ids(context, "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai", "czysu-eaaaa-aaaag-qcvdq-cai");
+                        let ok3 = Converter.set_canister_ids(context, 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"), 
+                                                    Principal.fromText("czysu-eaaaa-aaaag-qcvdq-cai"));
                         let active4 = Converter.IsActive(context);
 
-                        assertAllTrue([ 
+                        assertAllTrue([
+                            ok0,
+                            ok1,
+                            ok2,
+                            ok3, 
                             active0 == false, // Application should not have started out in active state.
                             active1 == false, // Application should not be considered active with one out of four canister ids set
                             active2 == false, // Application should not be considered active with two out of four canister ids set
