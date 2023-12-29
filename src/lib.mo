@@ -467,7 +467,7 @@ module {
           from_subaccount = null;
           to = account;
           amount = new_amount_checked_d8;
-          fee = null;
+          fee = ?settings.new_fee_d8;
           memo = null;
 
           created_at_time = null;
