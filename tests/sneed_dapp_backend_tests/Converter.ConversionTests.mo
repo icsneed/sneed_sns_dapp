@@ -1030,6 +1030,32 @@ module {
                     },
                 ),
                 it(
+                    "Calling convert twice inside the cooldown period when the first call traps externally should result in an #OnCooldown error.",
+                    do {
+
+                        // old: (100, 1000000000000, acct, dapp)
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(24));
+
+                        let convert_result = await* Converter.convert_account(context);
+                        let convert_result2 = await* Converter.convert_account(context);
+
+                        switch (convert_result) {
+                            case (#Err(#ExternalCanisterError( messsage ))) { 
+                                switch (convert_result2) {
+                                    case (#Err(#OnCooldown( error ))) { 
+                                        assertAllTrue([ 
+                                            error.since > 0,
+                                            error.remaining > 0 
+                                        ]);
+                                    };
+                                    case _ { false; };
+                                };
+                            };
+                            case _ { false; };
+                        };
+                    },
+                ),
+                it(
                     "Calling convert with invalid account should result in #InvalidAccount error.",
                     do {
                         let account = {
