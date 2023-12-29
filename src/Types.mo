@@ -38,6 +38,7 @@ type ConverterPersistentState = {
 
     var stable_new_latest_sent_txids : [(Principal, TxIndex)];
     var stable_old_latest_sent_txids : [(Principal, TxIndex)];
+    var stable_cooldowns : [(Principal, Time.Time)];
     var stable_log : [LogItem];
 
     var old_token_canister : TokenInterface;

@@ -24,6 +24,7 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
 
     state.ephemeral.new_latest_sent_txids := Map.fromIter<Principal, T.TxIndex>(persistent.stable_new_latest_sent_txids.vals(), 10, Principal.equal, Principal.hash);
     state.ephemeral.old_latest_sent_txids := Map.fromIter<Principal, T.TxIndex>(persistent.stable_old_latest_sent_txids.vals(), 10, Principal.equal, Principal.hash);
+    state.ephemeral.cooldowns := Map.fromIter<Principal, Time.Time>(persistent.stable_cooldowns.vals(), 10, Principal.equal, Principal.hash);
     state.ephemeral.log := Buffer.fromArray<T.LogItem>(persistent.stable_log); 
     
 // PUBLIC API
@@ -115,12 +116,14 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
     system func preupgrade() {
       persistent.stable_new_latest_sent_txids := Iter.toArray(state.ephemeral.new_latest_sent_txids.entries());
       persistent.stable_old_latest_sent_txids := Iter.toArray(state.ephemeral.old_latest_sent_txids.entries());
+      persistent.stable_cooldowns := Iter.toArray(state.ephemeral.cooldowns.entries());
       persistent.stable_log := Buffer.toArray(state.ephemeral.log);
     };
 
     system func postupgrade() {
       persistent.stable_new_latest_sent_txids := [];
       persistent.stable_old_latest_sent_txids := [];
+      persistent.stable_cooldowns := [];
       persistent.stable_log := [];
     };
 

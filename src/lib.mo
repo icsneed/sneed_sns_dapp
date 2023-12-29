@@ -70,15 +70,21 @@ module {
     // Before sending any converted tokens to an account, ensure this transaction index (if any) is found in the 
     // list of transactions fetched for the account at the beginning of the conversion.     
     let stable_new_latest_sent_txids : [(Principal, T.TxIndex)]= [];
-    let new_latest_sent_txids = Map.HashMap<Principal, T.TxIndex>(10, Principal.equal, Principal.hash);  //Map.fromIter<Principal, T.TxIndex>(stable_new_latest_sent_txids.vals(), 10, Principal.equal, Principal.hash);
-
+    let new_latest_sent_txids = Map.HashMap<Principal, T.TxIndex>(10, Principal.equal, Principal.hash);  
 
     let stable_old_latest_sent_txids : [(Principal, T.TxIndex)]= [];
-    let old_latest_sent_txids = Map.HashMap<Principal, T.TxIndex>(10, Principal.equal, Principal.hash); //Map.fromIter<Principal, T.TxIndex>(stable_old_latest_sent_txids.vals(), 10, Principal.equal, Principal.hash);
-
+    let old_latest_sent_txids = Map.HashMap<Principal, T.TxIndex>(10, Principal.equal, Principal.hash); 
+    
     // log
     let stable_log : [T.LogItem] = [];
     let log : T.Log = Buffer.Buffer<T.LogItem>(10);
+
+    // Keep track of when the "convert" function was most recently called for each
+    // account, and enforce a cooldown preventing the functions being called too
+    // frequently for a given account, giving indexers a chance to catch up. 
+    // This also prevents reentrancy issues.
+    let stable_cooldowns : [(Principal, Time.Time)]= [];
+    let cooldowns = Map.HashMap<Principal, Time.Time>(32, Principal.equal, Principal.hash);
 
     // dApp settings
     let allow_conversions = true;
@@ -104,16 +110,11 @@ module {
     //stable var old_burner_min_amount_d12 : T.Balance = 1_000_000_000;   // - TEST! NEVER USE IN PRODUCTION!  // 0.01 OLD tokens
     let old_burner_min_amount_d12 : T.Balance = 1000_000_000_000_000;  // 1000 OLD tokens
 
+    // Cooldown time in nanoseconds
     //stable var cooldown_ns : Nat = 60000000000; // "1 minute ns"         - DEV! NEVER USE IN PRODUCTION!
     //stable var cooldown_ns : Nat = 300000000000; // "5 minute ns"      - TEST! NEVER USE IN PRODUCTION!
     //stable var cooldown_ns : Nat = 600000000000; // "10 minutes ns"    - OPTIMISTIC
     let cooldown_ns : Nat = 3600000000000; // "1 hour ns"       - PESSIMISTIC
-
-    // Keep track of when the "convert" function was most recently called for each
-    // account, and enforce a cooldown preventing the functions being called too
-    // frequently for a given account, giving indexers a chance to catch up. 
-    // This also prevents reentrancy issues.
-    let cooldowns = Map.HashMap<Principal, Time.Time>(32, Principal.equal, Principal.hash);
 
     /// ACTORS ///
 
@@ -134,6 +135,7 @@ module {
         
             var stable_new_latest_sent_txids = stable_new_latest_sent_txids;
             var stable_old_latest_sent_txids = stable_old_latest_sent_txids;
+            var stable_cooldowns = stable_cooldowns;
             var stable_log = stable_log;
 
             var old_token_canister = old_token_canister;
