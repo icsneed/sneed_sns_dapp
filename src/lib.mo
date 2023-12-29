@@ -561,7 +561,7 @@ module {
     
     // Construct the argument for the request to the NEW token indexer.
     let new_index_req : T.NewIndexerRequest = {
-      max_results = 100000000;
+      max_results = 10000000000;
       start = null;
       account = account;
     };
