@@ -94,7 +94,7 @@ module {
     let new_fee_d8 = 1_000;
     let old_fee_d12 = 100_000_000;
 
-    let d8_to_d12 : Int = 10_000; // 12 to 8 decimals
+    let d8_to_d12 : Nat = 10_000; // 12 to 8 decimals
 
     // An account sending this amount or more of the NEW token to the dApp is considered a "Seeder".
     // Seeders cannot use the "convert" function to return their funds if "allow_seeder_conversions" is false. 
@@ -597,7 +597,7 @@ module {
 
         // Convert the OLD token balance from d12 to d8. 
         let old_balance_d8 : T.Balance = Int.abs(old_balance_d12 / settings.d8_to_d12);
-
+        
         // Perform sub-indexing of the NEW token transactions for the account. 
         // Pick out the transactions that are between the dApp and the account.
         // Sum up the amount of NEW tokens sent from the dApp to the account (converted tokens).
