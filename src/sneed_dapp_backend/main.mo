@@ -73,6 +73,10 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
       Converter.get_log(get_context_with_anon_account(caller));      
     };  
 
+    public shared func this_canister_id() : async Text {
+      Principal.toText(Principal.fromActor(this));
+    };
+
 // PRIVATE FUNCTIONS
 
     // The account representing this dApp

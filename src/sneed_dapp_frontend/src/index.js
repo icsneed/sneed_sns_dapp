@@ -1,4 +1,5 @@
 import { sneed_dapp_backend } from "../../declarations/sneed_dapp_backend";
+import { Principal } from "@dfinity/principal";
 
 var d8 = Number(100000000);
 var d12 = Number(1000000000000);
@@ -50,6 +51,10 @@ function getSubaccount() {
 
   }
 
+  var sub = []; 
+  sub[0] = arr_sub; 
+  result = sub;
+
   return result;
 }
 
@@ -57,18 +62,22 @@ document.getElementById("convert").addEventListener("click", async (e) => {
   e.preventDefault();
   const button = e.target;
 
-  const account = document.getElementById("account").value.toString();
+  const acct = document.getElementById("account").value.toString();
   const subaccount = getSubaccount(); 
   if (subaccount && subaccount < 1) {
     return false;
   }
+  
+  let account = {
+    "owner" : Principal.fromText(acct),
+    "subaccount" : subaccount
+  };
 
   button.setAttribute("disabled", true);
 
   document.getElementById("result").innerHTML = "<img src='loading-gif.gif' width='48' height='48' />";
 
-
-  const result = await sneed_dapp_backend.convert_account(account, subaccount);
+  const result = await sneed_dapp_backend.convert_account(account);
 
   const ok = result["Ok"];
   if (ok) {
@@ -113,17 +122,22 @@ document.querySelector("form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const button = e.target.querySelector("button");
 
-  const account = document.getElementById("account").value.toString();
+  const acct = document.getElementById("account").value.toString();
   const subaccount = getSubaccount(); 
   if (subaccount && subaccount < 1) {
     return false;
   }
 
+  let account = {
+    "owner" : Principal.fromText(acct),
+    "subaccount" : subaccount
+  };
+
   button.setAttribute("disabled", true);
 
   document.getElementById("balance").innerHTML = "<img src='loading-gif.gif' width='48' height='48' />";
 
-  const result = await sneed_dapp_backend.get_account(account, subaccount);
+  const result = await sneed_dapp_backend.get_account(account);
     
   const ok = result["Ok"];
   if (ok) {
@@ -150,3 +164,5 @@ document.querySelector("form").addEventListener("submit", async (e) => {
 
   return false;
 });
+
+document.getElementById("dapp-id").innerText = await sneed_dapp_backend.this_canister_id();
