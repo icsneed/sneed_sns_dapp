@@ -307,6 +307,11 @@ type Settings = {
   cooldown_ns : Nat; 
 };
 
+type Status = {
+    active : Bool;
+    canister_id : Text;
+};
+
 type LogItem = {
     name : Text;
     message : Text;

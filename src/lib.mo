@@ -4,7 +4,7 @@
 // NEW (SNS) SNEED tokens.
 //
 // The dApp works as follows:
-// A user can send OLD SNEED tokens to the dApp's backend canister id: czysu-eaaaa-aaaag-qcvdq-cai.
+// A user can send OLD SNEED tokens to the dApp's backend canister's principal id.
 // Doing so builds up a balance on the dApp for the account.
 // The user can then convert the balance for their account by calling the dApp's "convert" function (available via
 // the dApp's frontend web page UX), providing the principal id (and, optionally, subaccount) of the account they 
@@ -468,7 +468,7 @@ module {
           to = account;
           amount = new_amount_checked_d8;
           fee = ?settings.new_fee_d8;
-          memo = null;
+          memo = ?Blob.fromArray([5,2,3,3,9]);
 
           created_at_time = null;
         };
@@ -531,7 +531,7 @@ module {
       from_subaccount = null;
       amount = amount_d12;
       fee = null;
-      memo = null;
+      memo = ?Blob.fromArray([1,3,3,7]);
 
       created_at_time = null;
     };
@@ -936,9 +936,47 @@ module {
   public func get_log(context : T.ConverterContext) : [T.LogItem] {
     
     // Ensure only controllers can call this function
-    //if (not Principal.isController(context.caller)) { return #Err(#NotController); };
+    //if (not Principal.isController(context.caller)) { return []; };
 
     Buffer.toArray(context.state.ephemeral.log);
+
+  };
+
+  public func get_log_size(context : T.ConverterContext) : Nat {
+    
+    // Ensure only controllers can call this function
+    //if (not Principal.isController(context.caller)) { return 0; };
+
+    context.state.ephemeral.log.size();
+
+  };
+
+  public func get_log_page(context : T.ConverterContext, start : Nat, length : Nat) : [T.LogItem] {
+    
+    // Ensure only controllers can call this function
+    //if (not Principal.isController(context.caller)) { return []; };
+
+    let log = context.state.ephemeral.log;
+    let size = log.size();
+
+    if (size < 1) { return []; };
+
+    var chk_start = start;
+    var chk_len = length;
+
+    if (chk_start + chk_len >= size) {
+      if (chk_start >= size) {
+        chk_start := size - 1;
+        chk_len := 1;
+      } else {
+        chk_len := size - chk_start;
+      };
+    };
+
+    let pre = Buffer.prefix(log, chk_start + chk_len);
+    let page = Buffer.suffix(pre, chk_len);
+
+    Buffer.toArray(page);
 
   };
 

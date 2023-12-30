@@ -165,4 +165,14 @@ document.querySelector("form").addEventListener("submit", async (e) => {
   return false;
 });
 
-document.getElementById("dapp-id").innerText = await sneed_dapp_backend.this_canister_id();
+let status = await sneed_dapp_backend.get_status();
+let active = status["active"];
+if (active) {
+  document.getElementById("submit_button").removeAttribute("disabled"); 
+  document.getElementById("dapp_status").innerHTML = "Active."; 
+  document.getElementById("dapp_id").innerText = status["canister_id"]; 
+  document.getElementById("main_div").setAttribute("class", "active");   
+} else {
+  document.getElementById("dapp_status").innerHTML = "InActive.";   
+  document.getElementById("main_div").setAttribute("class", "inactive");   
+}

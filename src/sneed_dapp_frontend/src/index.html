@@ -3,29 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>sneed_dapp</title>
+    <title>SneedSwap</title>
     <base href="/" />
     <link rel="icon" href="favicon.ico" />
     <link type="text/css" rel="stylesheet" href="main.css" />
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@5/distr/fira_code.css"
+  />
+
   </head>
+
   <body>
     <main>
-      <img src="logo2.svg" alt="DFINITY logo" />
+      <img src="sneedswap.PNG" alt="SneedSwap logo" />
       <br />
-      <br />      
-      1) Send Sneed to: <b id="dapp-id"></b><br/>
+      <br />
+      Application Status: <b id="dapp_status"><img src='loading-gif.gif' width='24' height='24' /></b>
+      <br />
+      <br />
+      <div id="main_div" class="inactive">
+      1) Send OLD (non-SNS) SNEED to: <b id="dapp_id"></b><br/>
+      Please note this operation may take up to a few minutes to complete.<br /><br />
+      <b>Warning:</b> Tokens sent to this principal will not be refundable!<br/> 
+      The only use of this application is for converting OLD (non-SNS) SNEED into
+      NEW (SNS) SNEED!<br />
+      Do not send ANY tokens to this principal other than OLD (non-SNS) SNEED,
+      as they will be lost (not refundable)!<br/><br/>
       2) Check your balance:
+      <br /><br/>
       <form action="#">
-        <label for="account">Principal: &nbsp;</label>
-        <input id="account" alt="Principal" type="text" />
-        <label for="subaccount">Subaccount (optional): &nbsp;</label>
-        <input id="subaccount" alt="Subaccount" type="text" />
-        <button type="submit">Check Balance</button>
+        <label for="account">Principal: &nbsp;</label><br/>
+        <input id="account" alt="Principal" type="text" /><br/><br/>
+        <label for="subaccount">Subaccount (optional): &nbsp;</label><br/>
+        <input id="subaccount" alt="Subaccount" type="text" /><br/><br/>
+        <button type="submit" id="submit_button" disabled >Check Balance</button>
       </form>
+      <br />
       <section id="balance"></section>
-      3) Convert your Sneed to SNS-1:<br/>
-      <input id="convert" type="button" value="Convert"   />
+      <br />
+      3) Convert your OLD (non-SNS) SNEED to NEW (SNS) SNEED:<br/>
+      Please note this operation may take up to a few minutes to complete.<br /><br />
+      <input id="convert" type="button" value="Convert" disabled />
+      <br />
       <section id="result"></section>
+      </div>
     </main>
   </body>
 </html>

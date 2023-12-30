@@ -96,7 +96,7 @@ module {
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
                                     convert_log_item.args.fee == settings.new_fee_d8,
-                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.memo == Blob.fromArray([5,2,3,3,9]),
                                     convert_log_item.args.created_at_time == null,                                
                                     convert_log_item.args.amount * settings.d8_to_d12 == amount1 - settings.old_fee_d12 - (settings.new_fee_d8 * settings.d8_to_d12),
 
@@ -154,7 +154,7 @@ module {
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
                                     convert_log_item.args.fee == settings.new_fee_d8,
-                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.memo == Blob.fromArray([5,2,3,3,9]),
                                     convert_log_item.args.created_at_time == null,                                    
                                     convert_log_item.args.amount * settings.d8_to_d12 == amount1 + amount2 - (2 * settings.old_fee_d12) 
                                                                                             - (settings.new_fee_d8 * settings.d8_to_d12),
@@ -216,7 +216,7 @@ module {
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
                                     convert_log_item.args.fee == settings.new_fee_d8,
-                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.memo == Blob.fromArray([5,2,3,3,9]),
                                     convert_log_item.args.created_at_time == null,                                    
                                     convert_log_item.args.amount * settings.d8_to_d12 == amount1 + amount2 - (2 * settings.old_fee_d12) - amount3
                                                                                             - (settings.new_fee_d8 * settings.d8_to_d12),
@@ -281,7 +281,7 @@ module {
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
                                     convert_log_item.args.fee == settings.new_fee_d8,
-                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.memo == Blob.fromArray([5,2,3,3,9]),
                                     convert_log_item.args.created_at_time == null,                                    
                                     convert_log_item.args.amount * settings.d8_to_d12 == amount1 + amount2 - (2 * settings.old_fee_d12)
                                                                                             - (amount3 * settings.d8_to_d12) 
@@ -354,7 +354,7 @@ module {
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
                                     convert_log_item.args.fee == settings.new_fee_d8,
-                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.memo == Blob.fromArray([5,2,3,3,9]),
                                     convert_log_item.args.created_at_time == null,                                    
                                     convert_log_item.args.amount * settings.d8_to_d12 == amount1 + amount2 - (2 * settings.old_fee_d12)
                                                                                             - amount3
@@ -437,7 +437,7 @@ module {
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
                                     convert_log_item.args.fee == settings.new_fee_d8,
-                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.memo == Blob.fromArray([5,2,3,3,9]),
                                     convert_log_item.args.created_at_time == null,                                    
                                     convert_log_item.args.amount * settings.d8_to_d12 == amount1 + amount2 + (amount5 * settings.d8_to_d12) 
                                                                                             - (2 * settings.old_fee_d12)
@@ -513,7 +513,7 @@ module {
                                     convert_log_item.args.from_subaccount == null,
                                     Converter.CompareAccounts(convert_log_item.args.to, account),
                                     convert_log_item.args.fee == settings.new_fee_d8,
-                                    convert_log_item.args.memo == null,
+                                    convert_log_item.args.memo == Blob.fromArray([5,2,3,3,9]),
                                     convert_log_item.args.created_at_time == null,                                    
 
                                     indexedAccount.new_total_balance_d8 == 123446789,

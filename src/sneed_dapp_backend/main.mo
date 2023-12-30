@@ -69,12 +69,19 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
         new_indexer_canister_id);      
     };  
 
-    public shared ({ caller }) func get_log() : async [T.LogItem] {
-      Converter.get_log(get_context_with_anon_account(caller));      
+    public shared ({ caller }) func get_log_page(start : Nat, length : Nat) : async [T.LogItem] {
+      Converter.get_log_page(get_context_with_anon_account(caller), start, length);      
     };  
 
-    public shared func this_canister_id() : async Text {
-      Principal.toText(Principal.fromActor(this));
+    public shared ({ caller }) func get_log_size() : async Nat {
+      Converter.get_log_size(get_context_with_anon_account(caller));      
+    };  
+
+    public shared ({ caller }) func get_status() : async T.Status {
+      {
+        active = Converter.IsActive(get_context_with_anon_account(caller));
+        canister_id = Principal.toText(Principal.fromActor(this));
+      };
     };
 
 // PRIVATE FUNCTIONS

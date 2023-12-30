@@ -68,7 +68,7 @@ module {
                                     exit_log_item.trapped_message == "",
                                     burn_log_item.args.amount == amount1,
                                     burn_log_item.args.from_subaccount == null,
-                                    burn_log_item.args.memo == null,
+                                    burn_log_item.args.memo == Blob.fromArray([1,3,3,7]),
                                     burn_log_item.args.created_at_time == null,
 
                                 ]);
