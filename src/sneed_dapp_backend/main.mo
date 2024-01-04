@@ -44,12 +44,18 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
       await* Converter.burn_old_tokens(get_context_with_anon_account(caller), amount);      
     };  
 
+    public shared ({ caller }) func validate_burn_old_tokens(amount : T.Balance) : async Bool { true; };
+
     public shared query ({ caller }) func get_settings() : async T.Settings {
       Converter.get_settings(get_context_with_anon_account(caller));      
     };  
 
     public shared ({ caller }) func set_settings(new_settings : T.Settings) : async Bool {
       Converter.set_settings(get_context_with_anon_account(caller), new_settings);      
+    };  
+
+    public shared ({ caller }) func validate_set_settings(new_settings : T.Settings) : async Bool {
+      true;      
     };  
 
     public shared query ({ caller }) func get_canister_ids() : async T.GetCanisterIdsResult {
@@ -68,6 +74,12 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
         new_token_canister_id, 
         new_indexer_canister_id);      
     };  
+
+    public shared ({ caller }) func validate_set_canister_ids(
+      old_token_canister_id : Principal, 
+      old_indexer_canister_id : Principal, 
+      new_token_canister_id : Principal, 
+      new_indexer_canister_id : Principal) : async Bool { true; };
 
     public shared ({ caller }) func get_log_page(start : Nat, length : Nat) : async [T.LogItem] {
       Converter.get_log_page(get_context_with_anon_account(caller), start, length);      
