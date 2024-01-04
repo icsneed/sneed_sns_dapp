@@ -331,7 +331,7 @@ type LogItem = {
 };
 
 type ConvertLogItem = {
-    result : TransferResult;
+    result : ConvertResult;
     args : TransferArgs;
     account : IndexedAccount;
 };

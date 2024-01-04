@@ -476,7 +476,15 @@ module {
         };
 
         // transfer the new token to the account
-        let transfer_result = await state.persistent.new_token_canister.icrc1_transfer(transfer_args);
+        let transfer_result : T.ConvertResult = try {
+
+          await state.persistent.new_token_canister.icrc1_transfer(transfer_args);
+        
+        } catch e {
+
+          #Err(#ExternalCanisterError({ message = Error.message(e); }));
+
+        };
 
         // If the transaction succeeded, save away the index of the transfer transaction 
         // for verification during any possible subsequent calls to "convert" for the same account.          
@@ -997,7 +1005,7 @@ module {
     log_convert(context, "convert_account", "Enter", null, null)
   };
 
-  public func log_convert_call(context : T.ConverterContext, result : T.TransferResult, args : T.TransferArgs, account : T.IndexedAccount) : () {
+  public func log_convert_call(context : T.ConverterContext, result : T.ConvertResult, args : T.TransferArgs, account : T.IndexedAccount) : () {
     let convert : T.ConvertLogItem = {
       result = result;
       args = args;
