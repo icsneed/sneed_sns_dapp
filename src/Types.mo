@@ -214,6 +214,7 @@ type ConvertError = TransferError or {
     #IsSeeder;
     #IsBurner;
     #NotActive;
+    #TooManyTransactions;
     #NotController;
     #ConversionsNotAllowed;
     #IndexUnderflow : { 
@@ -239,6 +240,7 @@ type IndexAccountResult = {
 type IndexAccountError = {
     #InvalidAccount;
     #NotActive;
+    #TooManyTransactions;
     #ExternalCanisterError : { message: Text };   
 };
 
@@ -305,6 +307,7 @@ type Settings = {
   new_seeder_min_amount_d8 : Balance;
   old_burner_min_amount_d12 : Balance;
   cooldown_ns : Nat; 
+  max_transactions : Nat;
 };
 
 type Status = {

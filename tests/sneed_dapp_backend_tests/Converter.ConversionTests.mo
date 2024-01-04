@@ -1086,7 +1086,8 @@ module {
                             d8_to_d12 = 9999;
                             new_seeder_min_amount_d8 = 99999999999;
                             old_burner_min_amount_d12 = 77777777777;
-                            cooldown_ns = 42;                                 
+                            cooldown_ns = 42;
+                            max_transactions = 123;
                         };
 
                         let ok = Converter.set_settings(context, new_settings);
@@ -1095,6 +1096,34 @@ module {
                         
                         switch (convert_result) {
                             case (#Err(#ConversionsNotAllowed)) { true; };
+                            case _ { false; };
+                        };
+                    },
+                ),
+                it(
+                    "Calling convert when new indexer returns as many transactions as specified in settings.max_transactions (or more) should result in #TooManyTransactions error.",
+                    do {
+
+                        // new: (115, 100000000, account, dapp), (196, 100000000, dapp, account), (197, 100000000, dapp, account), (198, 100000000, dapp, account), (199, 100000000, dapp, account) 
+                        let context = TestUtil.get_account_context_with_mocks(controller, TestUtil.get_test_account(27));
+                        let new_settings : T.Settings = {
+                            allow_conversions = true;
+                            allow_burns = true;
+                            new_fee_d8 = 12345678;
+                            old_fee_d12 = 987654321;
+                            d8_to_d12 = 9999;
+                            new_seeder_min_amount_d8 = 99999999999;
+                            old_burner_min_amount_d12 = 77777777777;
+                            cooldown_ns = 42;
+                            max_transactions = 5;
+                        };
+
+                        let ok = Converter.set_settings(context, new_settings);
+
+                        let convert_result = await* Converter.convert_account(context);
+                        
+                        switch (convert_result) {
+                            case (#Err(#TooManyTransactions)) { true; };
                             case _ { false; };
                         };
                     },

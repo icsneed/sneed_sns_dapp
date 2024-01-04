@@ -130,6 +130,19 @@ shared actor class NewIndexerMock() : async T.NewIndexerInterface = {
             Debug.trap("New indexer canister mock trapped.");            
         };
 
+        if (Converter.CompareAccounts(account, TestUtil.get_test_account(27))) {
+            return #Ok({
+                transactions = [
+                    TestUtil.get_new_tx(115, 100000000, account, dapp), // 1 new token
+                    TestUtil.get_new_tx(196, 100000000, dapp, account), // 1 new token
+                    TestUtil.get_new_tx(197, 100000000, dapp, account), // 1 new token
+                    TestUtil.get_new_tx(198, 100000000, dapp, account), // 1 new token
+                    TestUtil.get_new_tx(199, 100000000, dapp, account), // 1 new token
+                ]; 
+                oldest_tx_id = ?115;
+            });            
+        };
+
         #Ok({
             transactions = [];
             oldest_tx_id = null;

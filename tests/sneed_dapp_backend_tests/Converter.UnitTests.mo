@@ -634,7 +634,8 @@ module {
                             d8_to_d12 = 9999;
                             new_seeder_min_amount_d8 = 99999999999;
                             old_burner_min_amount_d12 = 77777777777;
-                            cooldown_ns = 42;                                 
+                            cooldown_ns = 42;    
+                            max_transactions = 123;                             
                         };
 
                         let ok = Converter.set_settings(context, new_settings);
@@ -649,6 +650,7 @@ module {
                             old_settings.new_seeder_min_amount_d8 ==100_000_000_000,
                             old_settings.old_burner_min_amount_d12 == 1000_000_000_000_000,
                             old_settings.cooldown_ns == 3600000000000,
+                            old_settings.max_transactions == 100_000,
 
                             new_settings.allow_conversions == new_settings_result.allow_conversions,
                             new_settings.new_fee_d8 == new_settings_result.new_fee_d8,
@@ -656,7 +658,8 @@ module {
                             new_settings.d8_to_d12 == new_settings_result.d8_to_d12,
                             new_settings.new_seeder_min_amount_d8 == new_settings_result.new_seeder_min_amount_d8,
                             new_settings.old_burner_min_amount_d12 == new_settings_result.old_burner_min_amount_d12,
-                            new_settings.cooldown_ns == new_settings_result.cooldown_ns
+                            new_settings.cooldown_ns == new_settings_result.cooldown_ns,
+                            new_settings.max_transactions == new_settings_result.max_transactions
                         ]);
                     },
                 ),

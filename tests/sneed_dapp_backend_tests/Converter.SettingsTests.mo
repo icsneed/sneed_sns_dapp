@@ -52,6 +52,7 @@ module {
                             get_settings_result.new_seeder_min_amount_d8 == settings.new_seeder_min_amount_d8,
                             get_settings_result.old_burner_min_amount_d12 == settings.old_burner_min_amount_d12,
                             get_settings_result.cooldown_ns == settings.cooldown_ns,
+                            get_settings_result.max_transactions == settings.max_transactions
 
                         ]);
                     },
@@ -69,7 +70,8 @@ module {
                             d8_to_d12 = 9999;
                             new_seeder_min_amount_d8 = 99999999999;
                             old_burner_min_amount_d12 = 77777777777;
-                            cooldown_ns = 42;                                 
+                            cooldown_ns = 42;
+                            max_transactions = 123;                   
                         };
 
                         let old_settings = Converter.get_settings(context);
@@ -96,6 +98,7 @@ module {
                                     get_settings_result.new_seeder_min_amount_d8 == new_settings.new_seeder_min_amount_d8,
                                     get_settings_result.old_burner_min_amount_d12 == new_settings.old_burner_min_amount_d12,
                                     get_settings_result.cooldown_ns == new_settings.cooldown_ns,
+                                    get_settings_result.max_transactions == new_settings.max_transactions,
 
                                     log_item.name == "set_settings",
                                     log_item.message == "Complete",
@@ -112,6 +115,7 @@ module {
                                     log_new_settings.new_seeder_min_amount_d8 == new_settings.new_seeder_min_amount_d8,
                                     log_new_settings.old_burner_min_amount_d12 == new_settings.old_burner_min_amount_d12,
                                     log_new_settings.cooldown_ns == new_settings.cooldown_ns,
+                                    log_new_settings.max_transactions == new_settings.max_transactions,
 
                                     log_old_settings.allow_conversions == old_settings.allow_conversions,
                                     log_old_settings.allow_burns == old_settings.allow_burns,
@@ -121,6 +125,7 @@ module {
                                     log_old_settings.new_seeder_min_amount_d8 == old_settings.new_seeder_min_amount_d8,
                                     log_old_settings.old_burner_min_amount_d12 == old_settings.old_burner_min_amount_d12,
                                     log_old_settings.cooldown_ns == old_settings.cooldown_ns,
+                                    log_old_settings.max_transactions == old_settings.max_transactions
 
                                 ]);
 
@@ -142,7 +147,8 @@ module {
                             d8_to_d12 = 9999;
                             new_seeder_min_amount_d8 = 99999999999;
                             old_burner_min_amount_d12 = 77777777777;
-                            cooldown_ns = 42;                                 
+                            cooldown_ns = 42;
+                            max_transactions = 123;                           
                         };
 
                         not Converter.set_settings(context, new_settings);

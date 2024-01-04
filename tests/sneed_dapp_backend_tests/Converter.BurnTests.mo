@@ -186,6 +186,7 @@ module {
                             new_seeder_min_amount_d8 = 99999999999;
                             old_burner_min_amount_d12 = 77777777777;
                             cooldown_ns = 42;                                 
+                            max_transactions = 123;                                 
                         };
 
                         let ok = Converter.set_settings(context, new_settings);

@@ -116,6 +116,7 @@ module {
     //stable var cooldown_ns : Nat = 600000000000; // "10 minutes ns"    - OPTIMISTIC
     let cooldown_ns : Nat = 3600000000000; // "1 hour ns"       - PESSIMISTIC
 
+    let max_transactions : Nat = 100_000;
     /// ACTORS ///
 
     // Old token canister
@@ -155,6 +156,7 @@ module {
                 new_seeder_min_amount_d8 = new_seeder_min_amount_d8;
                 old_burner_min_amount_d12 = old_burner_min_amount_d12;
                 cooldown_ns = cooldown_ns; 
+                max_transactions = max_transactions;
 
             };
 
@@ -561,7 +563,7 @@ module {
     
     // Construct the argument for the request to the NEW token indexer.
     let new_index_req : T.NewIndexerRequest = {
-      max_results = 10000000000;
+      max_results = settings.max_transactions;
       start = null;
       account = account;
     };
@@ -577,6 +579,9 @@ module {
 
       // If the request to the NEW token indexer succeeded, proceed with the sub-indexing.
       case (#Ok(new_transactions)) { 
+
+        // Prevent conversion in case of too many transactions. 
+        if (new_transactions.transactions.size() >= settings.max_transactions) { return #Err(#TooManyTransactions); };
 
         // Encourage the OLD token indexer to be up to date.
         // (It is not critical if it fails, worst case the user sees a lower dApp
