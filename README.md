@@ -9,9 +9,13 @@ To install and run tests locally:
     dfx start 
 
 In a new console, also in sneed_sns_dapp directory:
-    dfx deploy
-
-NB: Make sure the canisters get the principal ids assigned to them in the "local" value in the canister_ids.json file, if not, you may need to deploy the canisters one by one, assigning the correct specific principal id to each ("dfx deploy sneed_dapp_backend bd3sg-teaaa-aaaaa-qaaba-cai" etc).
+    dfx deploy sneed_dapp_backend --specified-id "bd3sg-teaaa-aaaaa-qaaba-cai"
+    dfx deploy sneed_dapp_frontend --specified-id "bkyz2-fmaaa-aaaaa-qaaaq-cai"
+    dfx deploy sneed_dapp_tests --specified-id "by6od-j4aaa-aaaaa-qaadq-cai"
+    dfx deploy sneed_dapp_old_token_mock --specified-id "b77ix-eeaaa-aaaaa-qaada-cai"
+    dfx deploy sneed_dapp_new_token_mock --specified-id "br5f7-7uaaa-aaaaa-qaaca-cai"
+    dfx deploy sneed_dapp_old_indexer_mock --specified-id "bw4dl-smaaa-aaaaa-qaacq-cai"
+    dfx deploy sneed_dapp_new_indexer_mock --specified-id "be2us-64aaa-aaaaa-qaabq-cai"
 
 Then, to run the tests:
     dfx canister call sneed_dapp_tests run_tests

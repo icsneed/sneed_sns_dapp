@@ -67,10 +67,10 @@ module {
 
                         assertAllTrue([
 
-                            get_canister_ids_result.new_token_canister_id == persistent.new_token_canister,
-                            get_canister_ids_result.new_indexer_canister_id == persistent.new_indexer_canister,
-                            get_canister_ids_result.old_token_canister_id == persistent.old_token_canister,
-                            get_canister_ids_result.old_indexer_canister_id == persistent.old_indexer_canister,
+                            get_canister_ids_result.old_token_canister_id == Principal.fromActor(persistent.old_token_canister),
+                            get_canister_ids_result.old_indexer_canister_id == Principal.fromActor(persistent.old_indexer_canister),
+                            get_canister_ids_result.new_token_canister_id ==  Principal.fromActor(persistent.new_token_canister),
+                            get_canister_ids_result.new_indexer_canister_id == Principal.fromActor(persistent.new_indexer_canister),
 
                             get_canister_ids_result.old_token_canister_id == Principal.fromText("b77ix-eeaaa-aaaaa-qaada-cai"),
                             get_canister_ids_result.old_indexer_canister_id == Principal.fromText("bw4dl-smaaa-aaaaa-qaacq-cai"),
