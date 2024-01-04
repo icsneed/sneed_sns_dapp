@@ -586,7 +586,15 @@ module {
         // Encourage the OLD token indexer to be up to date.
         // (It is not critical if it fails, worst case the user sees a lower dApp
         // balance than they would expect and will have to check back later).
-        let waste = await state.persistent.old_indexer_canister.synch_archive_full(Principal.toText(Principal.fromActor(state.persistent.old_token_canister)));
+        try {
+
+          let waste = await state.persistent.old_indexer_canister.synch_archive_full(Principal.toText(Principal.fromActor(state.persistent.old_token_canister)));
+
+        } catch e {
+
+          // Do nothing special, if the call to synch failed, the indexer could still be up to date enough. 
+
+        };
 
         // Request the list of all transactions for the account from the OLD token indexer
         let old_transactions = await state.persistent.old_indexer_canister.get_account_transactions(Principal.toText(account.owner));
