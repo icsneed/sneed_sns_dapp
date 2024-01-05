@@ -1024,7 +1024,25 @@ module {
                         let convert_result = await* Converter.convert_account(context);
                         
                         switch (convert_result) {
-                            case (#Err(#ExternalCanisterError({ message }))) { assertTrue( message == "IC0503: Canister br5f7-7uaaa-aaaaa-qaaca-cai trapped explicitly: New ledger canister mock trapped." ); };
+                            case (#Err(#ExternalCanisterError({ message }))) { 
+
+                                let log_item_enter = TestUtil.must_get_latest_log_item(Converter.get_log(context), 2);
+                                let log_item_convert = TestUtil.must_get_latest_log_item(Converter.get_log(context), 1);
+                                let log_item_exit = TestUtil.must_get_latest_log_item(Converter.get_log(context), 0);
+                                let convert_log_item = TestUtil.must_get_convert_log_item(?log_item_convert);
+                                let exit_log_item = TestUtil.must_get_exit_log_item(?log_item_exit);
+
+                                assertAllTrue([ 
+                                    message == "IC0503: Canister br5f7-7uaaa-aaaaa-qaaca-cai trapped explicitly: New ledger canister mock trapped.",
+
+                                    log_item_enter.name == "convert_account",
+                                    log_item_enter.message == "Enter",
+                                    log_item_convert.name == "ConvertAccount",
+                                    log_item_convert.message == "Failed",
+                                    log_item_exit.name == "convert_account",
+                                    log_item_exit.message == "Exit",
+                                ]); 
+                            };
                             case _ { false; };
                         };
                     },

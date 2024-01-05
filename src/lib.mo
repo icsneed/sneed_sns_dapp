@@ -1012,7 +1012,11 @@ module {
       account = account;
     };
 
-    log_convert(context, "ConvertAccount", "Complete", ?convert, null)
+    let msg = switch(result) {
+      case(#Ok(tx_index)) { "Complete" };
+      case _ { "Failed"; };
+    };
+    log_convert(context, "ConvertAccount", msg, ?convert, null)
   };
 
   public func log_convert_exit(context : T.ConverterContext, result : T.ConvertResult, trapped_message : Text) : () {
