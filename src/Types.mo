@@ -30,6 +30,7 @@ type ConverterContext = {
     state : ConverterState;
     account : Account;
     converter : Account;
+    governance : Principal;
 };
 
 type ConverterState = {

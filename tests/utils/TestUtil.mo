@@ -121,6 +121,7 @@ module {
             state = state;
             account = account;
             converter = converter;
+            governance = Principal.fromText("2vxsx-fae")
         };
     };
 

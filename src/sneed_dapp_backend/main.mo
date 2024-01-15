@@ -18,6 +18,9 @@ import T "../Types";
 
 shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.ConverterInterface = this {
 
+    // TODO: Set to SNS governance canister principal id after SNS launch via dApp WASM Upgrade proposition! 
+    let sns_governance : Principal = Principal.fromText("2vxsx-fae");
+
     var state = Converter.init();
 
     stable let persistent = state.persistent;    
@@ -115,6 +118,7 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
             };
             account = account;
             converter = sneed_converter_account();
+            governance = sns_governance;
         };    
     };
 
@@ -131,6 +135,7 @@ shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.Conve
                 subaccount = null;
             };
             converter = sneed_converter_account();
+            governance = sns_governance;
         };    
     };
 

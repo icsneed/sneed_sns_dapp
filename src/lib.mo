@@ -273,8 +273,8 @@ module {
   // This method can only be called by the dApp's controllers.
   public func set_settings(context : T.ConverterContext, new_settings : T.Settings) : Bool {
 
-    // Ensure only controllers can call this function
-    if (not Principal.isController(context.caller)) { return false; };
+    // Ensure only admins can call this function
+    if (not IsAdmin(context)) { return false; };
 
     // Store away the old settings in a local variable for logging
     let old_settings = context.state.persistent.settings;
@@ -311,8 +311,8 @@ module {
     new_token_canister_id : Principal, 
     new_indexer_canister_id : Principal) : Bool {
 
-    // Ensure only controllers can call this function
-    if (not Principal.isController(context.caller)) { return false; };
+    // Ensure only admins can call this function
+    if (not IsAdmin(context)) { return false; };
 
     // Extract state from context
     let persistent = context.state.persistent;
@@ -508,8 +508,8 @@ module {
 
     // Initial Validation
     
-    // Ensure only controllers can call this function
-    if (not Principal.isController(context.caller)) { return #Err(#NotController); };
+    // Ensure only admins can call this function
+    if (not IsAdmin(context)) { return #Err(#NotController); };
 
     // Ensure the dApp has been activated (the canisters for the token ledgers and their indexers have been assigned)
     if (not IsActive(context)) { return #Err(#NotActive); };
@@ -855,6 +855,21 @@ module {
     };
   };
 
+  // Determine if caller is an administrator. 
+  // Only administrators have the right to call the following functions: set_canister_ids, set_settings, burn_old_tokens.
+  // The administrators are controllers of this dApp canister as well as the SNS governance canister (which sends the calls
+  // for generic function propositions).
+  private func IsAdmin(context : T.ConverterContext) : Bool {
+    Principal.isController(context.caller) or IsGovernance(context);
+  };
+
+  // Determine if the caller is the SNS governance canister. 
+  private func IsGovernance(context : T.ConverterContext) : Bool {
+    if (Principal.isAnonymous(context.caller)) { return false; };
+    if (Principal.isAnonymous(context.governance)) { return false; }; // Governance canister id has not been assigned yet.
+    context.caller == context.governance;
+  };
+
   // Check if the account is on cooldown (i.e. they have to wait until their cooldown expires to call "convert")
   public func OnCooldown(context : T.ConverterContext, owner : Principal) : Bool {
 
@@ -956,8 +971,8 @@ module {
 
   public func get_log(context : T.ConverterContext) : [T.LogItem] {
     
-    // Ensure only controllers can call this function
-    //if (not Principal.isController(context.caller)) { return []; };
+    // Ensure only admins can call this function
+    //if (not IsAdmin(context)) { return []; };
 
     Buffer.toArray(context.state.ephemeral.log);
 
@@ -965,8 +980,8 @@ module {
 
   public func get_log_size(context : T.ConverterContext) : Nat {
     
-    // Ensure only controllers can call this function
-    //if (not Principal.isController(context.caller)) { return 0; };
+    // Ensure only admins can call this function
+    //if (not IsAdmin(context)) { return 0; };
 
     context.state.ephemeral.log.size();
 
@@ -974,8 +989,8 @@ module {
 
   public func get_log_page(context : T.ConverterContext, start : Nat, length : Nat) : [T.LogItem] {
     
-    // Ensure only controllers can call this function
-    //if (not Principal.isController(context.caller)) { return []; };
+    // Ensure only admins can call this function
+    //if (not IsAdmin(context)) { return []; };
 
     let log = context.state.ephemeral.log;
     let size = log.size();
