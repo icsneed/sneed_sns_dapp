@@ -19,7 +19,12 @@ type TxIndex = Nat;
 type Balance = Nat;
 type TxIndexes = List.List<TxIndex>;
 type Log = Buffer.Buffer<LogItem>;
-     
+
+type ValidationResult = {
+    #Ok : Text;
+    #Err : Text;
+};
+
 type ConverterContext = {
     caller : Principal;
     state : ConverterState;
