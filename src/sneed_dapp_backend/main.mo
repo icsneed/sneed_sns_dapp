@@ -18,8 +18,8 @@ import T "../Types";
 
 shared ({ caller = _initializer_ }) actor class SneedConverter() : async T.ConverterInterface = this {
 
-    // TODO: Set to SNS governance canister principal id after SNS launch via dApp WASM Upgrade proposition! 
-    let sns_governance : Principal = Principal.fromText("2vxsx-fae");
+    // SNS governance canister principal id 
+    let sns_governance : Principal = Principal.fromText("fi3zi-fyaaa-aaaaq-aachq-cai");
 
     var state = Converter.init();
 
